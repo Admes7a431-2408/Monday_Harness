@@ -19,7 +19,7 @@ Primera versión definitiva de Monday. Reconstrucción completa: no comparte có
 - Instalación que fusiona en vez de sobrescribir, actualización que se detiene ante ediciones locales y `rollback` (`--all` para desinstalar).
 - `monday amend`: los cambios de contrato de una feature en curso quedan registrados e invalidan la revisión.
 - Estado de verificación persistido (`.monday/runtime/verification.json`): `status` y el inicio de sesión comunican ROJO/VERDE/DESACTUALIZADA/ninguna; terminar una sesión en rojo queda en el historial.
-- 48 pruebas deterministas (escenarios S1–S8, distribución, integridad del diseño, regresiones de la revisión independiente, estado de verificación), `tests/install_roundtrip.sh` y validación con agentes reales `tests/e2e_adapters.sh`.
+- 49 pruebas deterministas (escenarios S1–S8, distribución, integridad del diseño, regresiones de la revisión independiente, estado de verificación), `tests/install_roundtrip.sh` y validación con agentes reales `tests/e2e_adapters.sh`.
 
 ### Cambiado respecto a AgentForge
 

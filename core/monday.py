@@ -315,7 +315,8 @@ def verification_line(root):
                 "sin evidencia del estado actual no hay éxito: ejecuta ./init.sh")
     vigencia = "árbol actual" if current is not None else "sin git: vigencia no comprobable"
     if v["result"] == "GREEN":
-        return f"Verificación: VERDE ({v['at']}, {v['source']}; {vigencia})"
+        return (f"Verificación: VERDE ({v['at']}, {v['source']}; {vigencia}) — init.sh pasó; "
+                "el cierre de una feature lo decide `done`")
     return (f"Verificación: ROJO ({v['at']}, {v['source']}; {vigencia}) — fallan: {'; '.join(v['failing']) or 'init.sh'}. "
             "El trabajo NO está terminado, diga lo que diga cualquier informe.")
 
@@ -826,7 +827,7 @@ def plan_install(src, target, platforms):
     core = src / "core"
     writes = []
     for p in sorted(core.rglob("*")):
-        if p.is_file() and "__pycache__" not in p.parts:
+        if p.is_file() and not {"__pycache__", "runtime", "backups"} & set(p.relative_to(core).parts):  # estado local, no distribuible
             writes.append((f".monday/{p.relative_to(core).as_posix()}", p.read_bytes(), "managed"))
     tpl = core / "templates"
     for rel, name in SEEDS.items():

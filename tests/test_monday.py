@@ -454,6 +454,25 @@ class Distribution(Base):
         self.assertIn("monday", json.loads(p.read(".agents/hooks.json")))
         self.assertEqual(p.m("check").returncode, 0)
 
+    def test_local_runtime_state_is_never_distributed(self):
+        # En el repo de Monday `.monday -> core`: el estado efímero puede acabar en core/runtime y core/backups.
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("monday_cli", SRC_CLI)
+        cli = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cli)
+        src = Path(tempfile.mkdtemp(prefix="monday-src-"))
+        target = Path(tempfile.mkdtemp(prefix="monday-test-"))
+        self.addCleanup(shutil.rmtree, src, True)
+        self.addCleanup(shutil.rmtree, target, True)
+        shutil.copytree(REPO / "core", src / "core", ignore=shutil.ignore_patterns("runtime", "backups", "__pycache__"))
+        shutil.copytree(REPO / "adapters", src / "adapters")
+        for leaked in ("runtime/verification.json", "backups/x/journal.json", "__pycache__/m.pyc"):
+            (src / "core" / leaked).parent.mkdir(parents=True, exist_ok=True)
+            (src / "core" / leaked).write_text("{}")
+        paths = [rel for rel, _, _ in cli.plan_install(src, target, ["claude", "antigravity"])]
+        self.assertFalse([p for p in paths if "/runtime/" in p or "/backups/" in p or "__pycache__" in p], paths)
+        self.assertIn(".monday/monday.py", paths)
+
     def test_removed_adapter_hooks_are_detected(self):
         p = self.project()
         p.write(".agents/hooks.json", "{}\n")

@@ -26,3 +26,6 @@ Registro de cierres (`DONE`), rechazos, bloqueos y revisiones con su evidencia. 
 
 ## 2026-10-18 · M-001 · REVISIÓN: changes_required (monday-reviewer)
 - Ronda 4 (c932b6f..17fd6c5): el escenario 3 no debilita AC4 frente al requisito: la traza del hook sigue siendo obligatoria si hay cambios y deja de contar el texto del modelo. important: worktree_fingerprint (monday.py:284) solo cubre lo que difiere de HEAD, sin HEAD; un VERDE registrado con árbol limpio sigue como 'VERDE (árbol actual)' después de hacer commit de código roto (reproducido: status VERDE con init.sh en rojo). Solución: incluir HEAD en la huella. minor: con 'sin cambios en 2 intentos' e2e sale con 127 y AC4 pasa a UNAVAILABLE, que se puede cerrar con --manual (antes era FAIL); en Claude, terminar en rojo tras el bloqueo no deja entrada en history.md (stop_hook_active sale antes), al contrario de lo que dice la tabla de architecture.md; la huella excluye features.json y los archivos ignorados.
+
+## 2026-10-18 · M-001 · RECHAZADO
+- init.sh PASS · AC1 FAIL · AC2 PASS · AC3 PASS · AC4 PASS · AC5 MANUAL · scope PASS · review PASS

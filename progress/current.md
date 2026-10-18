@@ -18,7 +18,8 @@ Feature: M-001 — Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y A
 - Fases I–V hechas; revisión independiente aprobada en ronda 3; `done` rechazó por AC4 (agy) → feature reanudada para resolver AC4 reforzando el adaptador (decisión humana: opción 2, AC4 intacto).
 - Causa raíz (exploration_logs): agy -p devuelve el último texto del modelo con SUCCESS; ningún hook lo altera y el soft-deny no reinvoca Stop.
 - Corrección: estado de verificación persistido (`verification.json`) comunicado por `status`/inicio de sesión; sesión terminada en rojo → history.md; e2e AC4 juzga por estado verificable + escenario adversarial. 46 tests OK; las 5 nuevas fallan con el código anterior.
-- Siguiente: e2e real completa → revisión independiente de la corrección → `monday done M-001`.
+- E2E real completa tras 8bac75e: 16/16 PASS. Revisión: ronda 4 changes_required (huella sin HEAD + 3 minor) → corregidos; ronda 5 approve.
+- Siguiente: `monday done M-001`.
 
 ## Bloqueos y errores
 
@@ -31,4 +32,7 @@ Feature: M-001 — Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y A
 - La revisión independiente encontró 3 defectos importantes reales (rollback pisaba archivos fusionados; contrato de features.json manipulable sin rastro; anti-bucle del Stop roto por salidas variables) y uno en la 2.ª ronda (base del diff fuera de la huella); todos con test de regresión.
 - Hallazgos de plataforma: en agy `{}` deniega y `ask`/`force_ask` se autoaprueban en accept-edits → Monday usa `deny`.
 - Revisión ronda 3: approve (monday-reviewer). Minor diferido a M-004 (guarda de `amend` vía alias).
+- AC4: la causa raíz fue que `agy -p` devuelve el último texto del modelo (incluso anterior a un bloqueo) con SUCCESS, y ningún hook lo cambia. Ahora el cierre lo decide la verificación persistida (D-011); la e2e incluye un escenario adversarial. Revisión rondas 4–5.
+- Minor diferido (ronda 5): `stop_hook_active` también es true si bloqueó otro Stop hook del usuario; Monday entonces solo registra.
+- Requiere decisión humana: skills globales `monday` que aún enlazan a AgentForge (~/.claude/skills, ~/.gemini/config/skills); `command(./init.sh)` en la allowlist global de agy para que el agente pueda autoverificarse en headless.
 - Pendiente fuera de alcance: M-002 (Codex), M-003 (Antigravity IDE), validación interactiva del diálogo `ask` en Claude Code.

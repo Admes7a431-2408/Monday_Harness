@@ -57,12 +57,12 @@
       },
       "contract": "7c3057af043952fee9ae16e24fd210b383833fbdcb0076dca8e8fdc0cf3c21ca",
       "review": {
-        "verdict": "changes_required",
+        "verdict": "approve",
         "by": "monday-reviewer",
-        "at": "2026-10-18T18:50:44-04:00",
-        "fingerprint": "1b601fc4d6885f0688f8dded935f771bf0358faedbea1cf51188e32271899212",
+        "at": "2026-10-18T19:00:29-04:00",
+        "fingerprint": "d20dc4765730eff7c8ffe9bc63744c2a8533a2e4490bf736d5bec472fe440206",
         "files": 36,
-        "notes": "Ronda 4 (c932b6f..17fd6c5): el escenario 3 no debilita AC4 frente al requisito: la traza del hook sigue siendo obligatoria si hay cambios y deja de contar el texto del modelo. important: worktree_fingerprint (monday.py:284) solo cubre lo que difiere de HEAD, sin HEAD; un VERDE registrado con árbol limpio sigue como 'VERDE (árbol actual)' después de hacer commit de código roto (reproducido: status VERDE con init.sh en rojo). Solución: incluir HEAD en la huella. minor: con 'sin cambios en 2 intentos' e2e sale con 127 y AC4 pasa a UNAVAILABLE, que se puede cerrar con --manual (antes era FAIL); en Claude, terminar en rojo tras el bloqueo no deja entrada en history.md (stop_hook_active sale antes), al contrario de lo que dice la tabla de architecture.md; la huella excluye features.json y los archivos ignorados."
+        "notes": "Ronda 5 (17fd6c5..8bac75e): important addressed: la huella de verificación incluye HEAD (test_green_does_not_survive_a_commit; mi escenario ahora da DESACTUALIZADA). Minors addressed: precondición e2e incumplida = FAIL (no se puede cerrar con --manual); 2.ª parada de Claude en rojo se registra en history.md sin volver a bloquear; exclusión de always_writable/ignorados y editabilidad de verification.json documentadas. Minor residual: si otro Stop hook del usuario bloquea primero, stop_hook_active hace que Monday solo registre y no bloquee. 48 tests OK; e2e 16/16 informada por el líder, no reejecutada."
       }
     },
     {

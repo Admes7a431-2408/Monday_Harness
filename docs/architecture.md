@@ -99,6 +99,7 @@ Contexto: en AC4, un agente de Antigravity bloqueado por el hook `Stop` terminó
 
 ## Reglas aprendidas
 
+- `install` distribuye solo lo versionable de `core/`: en el repo de Monday `.monday -> core`, así que el estado efímero (`runtime/`, `backups/`) acaba en `core/` y se copiaba como archivo gestionado — evidencia: `done` de M-001 rechazado por AC1 tras crear `core/runtime/verification.json` (`progress/history.md`).
 - El texto final de un agente nunca es evidencia de éxito, tampoco en las pruebas e2e: el criterio debe leer estado verificable (`status`, `done`, `init.sh`) — evidencia: AC4 rechazado en el cierre de M-001 (`progress/history.md`) y su causa raíz (`progress/exploration_logs.md`).
 
 - Los criterios que ejecutan Python en tests deben usar `python3 -B` o un `.gitignore` con `__pycache__/`: una caché `.pyc` del mismo segundo y tamaño ocultó un arreglo y apareció como cambio fuera de alcance — evidencia: primera ejecución de `tests/test_monday.py` (2026-10-18).
