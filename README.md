@@ -89,7 +89,7 @@ Otra plataforma (Codex, Cursor…) se añade con una carpeta en `adapters/` y un
 ## Probar Monday desde cero
 
 ```bash
-./init.sh                                   # harness de este repo + 46 pruebas (escenarios S1–S8, distribución, diseño, regresiones)
+./init.sh                                   # harness de este repo + 48 pruebas (escenarios S1–S8, distribución, diseño, regresiones)
 bash tests/install_roundtrip.sh             # instalar → init.sh → reinstalar → rollback --all deja el directorio vacío
 bash tests/e2e_adapters.sh claude           # agentes reales (consume tokens; requiere sesión iniciada)
 bash tests/e2e_adapters.sh antigravity

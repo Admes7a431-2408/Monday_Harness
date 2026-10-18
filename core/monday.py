@@ -282,12 +282,13 @@ def run_init(root, timeout, full=False):
 
 
 def worktree_fingerprint(root):
-    """Huella de lo que difiere de HEAD (sin la memoria del harness); None sin git."""
+    """Huella del árbol verificado: commit de HEAD + archivos que difieren de él, sin la memoria que escribe
+    el propio Monday (si no, `done` invalidaría su propia verificación); None sin git."""
     if not git_available(root):
         return None
-    policy = load_policy()
-    dirty = [p for p in changed_files(root, head_or_empty(root)) if not matches(p, policy["always_writable"])]
-    return fingerprint(root, dirty)
+    head = head_or_empty(root)
+    dirty = [p for p in changed_files(root, head) if not matches(p, load_policy()["always_writable"])]
+    return sha256(f"{head}\n{fingerprint(root, dirty)}".encode())
 
 
 def failing_checks(detail):
@@ -701,8 +702,8 @@ def hook_pre(platform, payload, root):
 
 
 def hook_stop(platform, payload, root):
-    if platform == "claude" and payload.get("stop_hook_active"):
-        return None
+    # Claude ya continuó por un bloqueo previo: se verifica y registra, pero no se vuelve a bloquear (sin bucles).
+    already_blocked = platform == "claude" and payload.get("stop_hook_active")
     if git_available(root):
         policy = load_policy()
         dirty = [p for p in changed_files(root, "HEAD" if head_or_empty(root) != EMPTY_TREE else EMPTY_TREE)
@@ -718,8 +719,8 @@ def hook_stop(platform, payload, root):
     # Firma = qué comprobaciones fallan, no su salida (que incluye tiempos): el mismo fallo no bloquea dos veces.
     failing = failing_checks(detail)
     sig = sha256("\n".join(failing or [detail.splitlines()[0] if detail else ""]).encode())
-    if marker.is_file() and json.loads(marker.read_text()).get("sig") == sig:
-        marker.unlink()                                   # mismo fallo ya señalado: no bloquear en bucle
+    if already_blocked or (marker.is_file() and json.loads(marker.read_text()).get("sig") == sig):
+        marker.unlink(missing_ok=True)                    # mismo fallo ya señalado: no bloquear en bucle
         # La plataforma puede mostrar cualquier texto del modelo como resultado: la verdad queda en Monday.
         append_history(root, f"## {now()[:10]} · SESIÓN TERMINADA CON init.sh EN ROJO ({platform})\n"
                              f"- Fallan: {'; '.join(failing) or 'init.sh'}\n"

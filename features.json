@@ -57,12 +57,12 @@
       },
       "contract": "7c3057af043952fee9ae16e24fd210b383833fbdcb0076dca8e8fdc0cf3c21ca",
       "review": {
-        "verdict": "approve",
+        "verdict": "changes_required",
         "by": "monday-reviewer",
-        "at": "2026-10-18T17:24:13-04:00",
-        "fingerprint": "3846564ae2061f07877b3eb8e493caa96611661461e1545fb98c24b717939069",
-        "files": 37,
-        "notes": "Ronda 3 (b1735d9..b0d25c2): (a) base/preexisting en la huella de contrato, calculada tras fijarlos: addressed (test de regresión, huella de M-001 coherente); (b) amend en ask_commands: addressed. Minor pendiente: la guarda no ve 'M=\"python3 .monday/monday.py\"; $M amend …' (convención $M de method.md), que devuelve OK. 39 tests OK; AC4 lo ejecutó el líder (unos 5 min)."
+        "at": "2026-10-18T18:50:44-04:00",
+        "fingerprint": "1b601fc4d6885f0688f8dded935f771bf0358faedbea1cf51188e32271899212",
+        "files": 36,
+        "notes": "Ronda 4 (c932b6f..17fd6c5): el escenario 3 no debilita AC4 frente al requisito: la traza del hook sigue siendo obligatoria si hay cambios y deja de contar el texto del modelo. important: worktree_fingerprint (monday.py:284) solo cubre lo que difiere de HEAD, sin HEAD; un VERDE registrado con árbol limpio sigue como 'VERDE (árbol actual)' después de hacer commit de código roto (reproducido: status VERDE con init.sh en rojo). Solución: incluir HEAD en la huella. minor: con 'sin cambios en 2 intentos' e2e sale con 127 y AC4 pasa a UNAVAILABLE, que se puede cerrar con --manual (antes era FAIL); en Claude, terminar en rojo tras el bloqueo no deja entrada en history.md (stop_hook_active sale antes), al contrario de lo que dice la tabla de architecture.md; la huella excluye features.json y los archivos ignorados."
       }
     },
     {

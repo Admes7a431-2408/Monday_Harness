@@ -615,6 +615,27 @@ class VerificationState(Base):
         p.write("src/otro.py", "x = 1\n")
         self.assertIn("DESACTUALIZADA", p.m("status").stdout)
 
+    def test_green_does_not_survive_a_commit(self):
+        p = self.project()
+        p.add_feature()
+        p.m("start", "F-001")
+        p.fix_bug()
+        p.commit("arreglo commiteado antes de cerrar")   # done verifica en verde sobre un árbol limpio
+        self.assertEqual(p.m("done", "F-001").returncode, 0)
+        self.assertIn("Verificación: VERDE", p.m("status").stdout)
+        p.write("src/calc.py", "def add(a, b):\n    return a - b\n")
+        p.commit("código roto commiteado")
+        status = p.m("status").stdout
+        self.assertNotIn("Verificación: VERDE", status)
+        self.assertIn("DESACTUALIZADA", status)
+
+    def test_claude_second_stop_in_red_is_recorded(self):
+        p = self.red_project()
+        self.stop(p, plat="claude")
+        r = p.m("hook", "stop", "--platform", "claude", inp=json.dumps({"cwd": str(p.dir), "stop_hook_active": True}))
+        self.assertEqual(r.stdout.strip(), "", "no se bloquea dos veces")
+        self.assertIn("SESIÓN TERMINADA CON init.sh EN ROJO (claude)", p.read("progress/history.md"))
+
     def test_missing_init_is_red_not_success(self):
         p = self.project()
         p.add_feature()
