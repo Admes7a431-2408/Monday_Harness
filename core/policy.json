@@ -1,0 +1,29 @@
+{
+  "always_writable": ["progress/**", "features.json"],
+  "protected_paths": [
+    ".monday/**",
+    ".git/**",
+    ".claude/settings.json",
+    ".claude/settings.local.json",
+    ".agents/hooks.json"
+  ],
+  "ask_commands": [
+    "\\bgit\\s+push\\b",
+    "\\bgit\\s+reset\\s+--hard\\b",
+    "\\bgit\\s+clean\\s+-\\w*f",
+    "\\bgit\\s+(rebase|filter-branch|filter-repo)\\b",
+    "\\bgit\\s+commit\\b.*--amend",
+    "\\bgit\\s+tag\\b",
+    "\\bgit\\s+branch\\s+-D\\b",
+    "\\brm\\s+(-\\w*r\\w*f|-\\w*f\\w*r|-r\\s+-f|-f\\s+-r|--recursive)",
+    "\\bsudo\\b",
+    "\\b(npm|pnpm|yarn)\\s+publish\\b",
+    "\\b(npm|pnpm)\\s+(i|install|add)\\s+(-g|--global)\\b",
+    "\\bpip3?\\s+install\\b",
+    "\\bgh\\s+(release|pr\\s+merge|repo\\s+(delete|create))\\b",
+    "\\b(docker|podman)\\s+push\\b",
+    "\\b(curl|wget)\\b[^|]*\\|\\s*(sudo\\s+)?(ba|z)?sh\\b",
+    "\\bchmod\\s+-R\\b",
+    "\\bdd\\s+if="
+  ]
+}

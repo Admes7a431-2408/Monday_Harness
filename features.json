@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "features": [
+    {
+      "id": "M-001",
+      "title": "Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y Antigravity, distribución reversible y validación",
+      "description": "Primera versión definitiva reconstruida desde la guía normativa y la evidencia histórica de AgentForge (progress/exploration_logs.md).",
+      "status": "in_progress",
+      "risk": "high",
+      "scope": [
+        "core/**",
+        "adapters/**",
+        "tests/**",
+        "docs/**",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE",
+        "init.sh",
+        "install.sh",
+        ".gitignore",
+        ".monday",
+        ".claude/**",
+        ".agents/**"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "La batería de escenarios S1–S8, distribución e integridad pasa",
+          "verify": "python3 -m unittest discover -s tests -q"
+        },
+        {
+          "id": "AC2",
+          "text": "AGENTS.md (repo y plantilla) tiene menos de 200 líneas",
+          "verify": "test $(wc -l < AGENTS.md) -lt 200 && test $(wc -l < core/templates/AGENTS.md) -lt 200"
+        },
+        {
+          "id": "AC3",
+          "text": "Instalar en un directorio vacío deja init.sh en verde y rollback --all lo devuelve vacío",
+          "verify": "bash tests/install_roundtrip.sh"
+        },
+        {
+          "id": "AC4",
+          "text": "Adaptadores validados con agentes reales (claude -p y agy -p): contexto cargado, guarda de alcance y hook de parada",
+          "verify": "bash tests/e2e_adapters.sh"
+        },
+        {
+          "id": "AC5",
+          "text": "Documentación de arquitectura, uso y notas de release coherentes con lo implementado y probado"
+        }
+      ],
+      "started_at": "2026-10-18T16:57:46-04:00",
+      "base": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "preexisting": {
+        "Arquitectura Óptima de Arnés para Agentes IA.md": "313acab04c8e28f36900dcaa65fcfc4bf2ae6fe6b2eaa8e362de29bb89dbda53"
+      }
+    },
+    {
+      "id": "M-002",
+      "title": "Adaptador Codex CLI",
+      "description": "Codex lee AGENTS.md de forma nativa; falta mapear hooks/permisos y agentes si existen. Validar con el CLI real antes de declarar compatibilidad.",
+      "status": "pending",
+      "risk": "medium",
+      "scope": [
+        "adapters/codex/**",
+        "core/monday.py",
+        "tests/**",
+        "README.md"
+      ],
+      "acceptance_criteria": []
+    },
+    {
+      "id": "M-003",
+      "title": "Validar Antigravity IDE (no solo el CLI) con hooks de workspace",
+      "status": "pending",
+      "risk": "low",
+      "scope": [
+        "adapters/antigravity/**",
+        "docs/**"
+      ],
+      "acceptance_criteria": []
+    }
+  ]
+}
