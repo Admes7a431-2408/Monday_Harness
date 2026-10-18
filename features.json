@@ -5,7 +5,7 @@
       "id": "M-001",
       "title": "Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y Antigravity, distribución reversible y validación",
       "description": "Primera versión definitiva reconstruida desde la guía normativa y la evidencia histórica de AgentForge (progress/exploration_logs.md).",
-      "status": "in_progress",
+      "status": "done",
       "risk": "high",
       "scope": [
         "core/**",
@@ -59,11 +59,12 @@
       "review": {
         "verdict": "approve",
         "by": "monday-reviewer",
-        "at": "2026-10-18T19:00:29-04:00",
-        "fingerprint": "d20dc4765730eff7c8ffe9bc63744c2a8533a2e4490bf736d5bec472fe440206",
+        "at": "2026-10-18T19:17:07-04:00",
+        "fingerprint": "50ce7e4f411277e36a1e5bb1f58db8293aa72ab52da29444b07f7198f135ef20",
         "files": 36,
-        "notes": "Ronda 5 (17fd6c5..8bac75e): important addressed: la huella de verificación incluye HEAD (test_green_does_not_survive_a_commit; mi escenario ahora da DESACTUALIZADA). Minors addressed: precondición e2e incumplida = FAIL (no se puede cerrar con --manual); 2.ª parada de Claude en rojo se registra en history.md sin volver a bloquear; exclusión de always_writable/ignorados y editabilidad de verification.json documentadas. Minor residual: si otro Stop hook del usuario bloquea primero, stop_hook_active hace que Monday solo registre y no bloquee. 48 tests OK; e2e 16/16 informada por el líder, no reejecutada."
-      }
+        "notes": "Ronda 6 (8bac75e..bdd7ae2): plan_install excluye runtime/, backups/ y __pycache__ de core/; comprobado con install real con core/runtime presente en el repo: sin fuga y check PASS. El test de regresión es independiente del estado del repo. El texto de VERDE en status ya no sugiere cierre. 49 tests OK; install_roundtrip PASS. AC4 debe reejecutarse en done con la distribución corregida."
+      },
+      "done_at": "2026-10-18T19:30:59-04:00"
     },
     {
       "id": "M-002",

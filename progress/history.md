@@ -29,3 +29,17 @@ Registro de cierres (`DONE`), rechazos, bloqueos y revisiones con su evidencia. 
 
 ## 2026-10-18 · M-001 · RECHAZADO
 - init.sh PASS · AC1 FAIL · AC2 PASS · AC3 PASS · AC4 PASS · AC5 MANUAL · scope PASS · review PASS
+
+## 2026-10-18 · M-001 · DONE — Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y Antigravity, distribución reversible y validación
+- Evidencia: init.sh PASS · AC1 PASS · AC2 PASS · AC3 PASS · AC4 PASS · AC5 MANUAL · scope PASS · review PASS
+- Archivos: .gitignore, .monday, AGENTS.md, CHANGELOG.md, CLAUDE.md, LICENSE, README.md, adapters/antigravity/agents/monday-explorer.md, adapters/antigravity/agents/monday-implementer.md, adapters/antigravity/agents/monday-reviewer.md, adapters/antigravity/hooks.json, adapters/claude-code/CLAUDE.md, adapters/claude-code/agents/monday-explorer.md, adapters/claude-code/agents/monday-implementer.md, adapters/claude-code/agents/monday-reviewer.md, adapters/claude-code/settings.json, core/.gitignore, core/VERSION, core/method.md, core/monday.py, core/policy.json, core/roles/explorer.md, core/roles/implementer.md, core/roles/reviewer.md, core/templates/AGENTS.md, core/templates/architecture.md, core/templates/current.md, core/templates/exploration_logs.md, core/templates/features.json, core/templates/history.md, core/templates/init.sh, docs/architecture.md, init.sh, tests/e2e_adapters.sh, tests/install_roundtrip.sh, tests/test_monday.py
+- Evidencia manual AC5: evidencia: README, CHANGELOG y docs/architecture.md revisados contra lo implementado tras la corrección de AC4 y del empaquetado: recuentos (49 tests, 16 controles e2e), D-011, tabla de compatibilidad, límites (response de agy no controlable, allowlist global para ./init.sh) y reglas aprendidas coinciden con resultados ejecutados; revisión independiente rondas 1–6
+- Monday 1.0.0 construido desde la guía normativa; AgentForge auditado como evidencia histórica (exploration_logs). Decisiones D-001…D-010 en docs/architecture.md.
+- La revisión independiente encontró 3 defectos importantes reales (rollback pisaba archivos fusionados; contrato de features.json manipulable sin rastro; anti-bucle del Stop roto por salidas variables) y uno en la 2.ª ronda (base del diff fuera de la huella); todos con test de regresión.
+- Hallazgos de plataforma: en agy `{}` deniega y `ask`/`force_ask` se autoaprueban en accept-edits → Monday usa `deny`.
+- Revisión ronda 3: approve (monday-reviewer). Minor diferido a M-004 (guarda de `amend` vía alias).
+- AC4: la causa raíz fue que `agy -p` devuelve el último texto del modelo (incluso anterior a un bloqueo) con SUCCESS, y ningún hook lo cambia. Ahora el cierre lo decide la verificación persistida (D-011); la e2e incluye un escenario adversarial. Revisión rondas 4–5.
+- `done` (2.º intento) rechazó AC1: `install` distribuía `core/runtime/` (estado del repo vía `.monday -> core`); corregido con test (ronda 6 approve).
+- Minor diferido (ronda 5): `stop_hook_active` también es true si bloqueó otro Stop hook del usuario; Monday entonces solo registra.
+- Requiere decisión humana: skills globales `monday` que aún enlazan a AgentForge (~/.claude/skills, ~/.gemini/config/skills); `command(./init.sh)` en la allowlist global de agy para que el agente pueda autoverificarse en headless.
+- Pendiente fuera de alcance: M-002 (Codex), M-003 (Antigravity IDE), validación interactiva del diálogo `ask` en Claude Code.
