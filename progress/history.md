@@ -9,3 +9,11 @@ Registro de cierres (`DONE`), rechazos, bloqueos y revisiones con su evidencia. 
 - Motivo: La huella de contrato (D-010) se introdujo tras start a raíz de la revisión; el contrato de M-001 no ha cambiado desde su definición. En el arranque se ajustó 'preexisting' a mano (solo la guía), ver ruling en current.md.
 - Ahora: risk high · scope core/**, adapters/**, tests/**, docs/**, AGENTS.md, CLAUDE.md, README.md, CHANGELOG.md, LICENSE, init.sh, install.sh, .gitignore, .monday, .claude/**, .agents/** · criterios AC1, AC2, AC3, AC4, AC5 (manual)
 - La revisión previa queda invalidada
+
+## 2026-10-18 · M-001 · REVISIÓN: changes_required (monday-reviewer)
+- Re-revisión 080a5af..b1735d9: (1) rollback addressed; (3) firma Stop addressed (alterna block/allow, reproducido); (4)(5)(6)(7)(8) addressed. (2) parcial, important: CONTRACT_KEYS no incluye base ni preexisting y la huella se calcula antes de fijar base (monday.py:417); reproducido: commit con README fuera de alcance + editar solo 'base'=HEAD en features.json -> review sobre 0 archivos y done ACEPTADO, sin recalcular huella. minor: 'amend' no está en ask_commands (guard --cmd OK), así que rebajar risk/ampliar scope no pasa por el humano aunque method.md lo exige.
+
+## 2026-10-18 · M-001 · CONTRATO MODIFICADO
+- Motivo: La huella ahora incluye base/preexisting (2.ª ronda de revisión); contrato de M-001 sin cambios.
+- Ahora: risk high · scope core/**, adapters/**, tests/**, docs/**, AGENTS.md, CLAUDE.md, README.md, CHANGELOG.md, LICENSE, init.sh, install.sh, .gitignore, .monday, .claude/**, .agents/** · criterios AC1, AC2, AC3, AC4, AC5 (manual)
+- La revisión previa queda invalidada

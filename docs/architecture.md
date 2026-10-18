@@ -89,7 +89,7 @@ Contexto: la automejora necesita detectar errores repetidos sin crear otro regis
 
 ### D-010 — Huella del contrato y `monday amend` (2026-10-18)
 
-Contexto: la revisión independiente de M-001 demostró que rebajar `risk`, ampliar `scope` o vaciar un `verify` en `features.json` permitía un `done` aceptado sin rastro. Decisión: `start` guarda la huella de risk/scope/criterios/revisión/dependencias; `done` la exige intacta; `amend --reason` la renueva, lo registra en `history.md` e invalida la revisión. Alternativas descartadas: proteger `features.json` con la guarda (el líder debe poder añadir features); comparar con `git show <base>` (falla si la feature se creó sin commitear). Consecuencias: cambiar el contrato es posible pero siempre visible.
+Contexto: la revisión independiente de M-001 demostró que rebajar `risk`, ampliar `scope` o vaciar un `verify` en `features.json` permitía un `done` aceptado sin rastro. Decisión: `start` guarda la huella de risk/scope/criterios/revisión/dependencias y de la base del diff (`base`, `preexisting`); `done` la exige intacta; `amend --reason` la renueva, lo registra en `history.md` e invalida la revisión; `amend` está en `policy.json`, así que con hooks requiere permiso humano. Alternativas descartadas: proteger `features.json` con la guarda (el líder debe poder añadir features); comparar con `git show <base>` (falla si la feature se creó sin commitear). Consecuencias: cambiar el contrato es posible pero siempre visible.
 
 ## Reglas aprendidas
 

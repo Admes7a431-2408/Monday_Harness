@@ -33,7 +33,7 @@ Las acciones irreversibles o con efectos fuera del workspace no son un nivel de 
 7. **Revisar** (obligatorio si `risk: high` o `review_required`): revisión independiente (§3), registrada con `$M review`.
 8. **Cerrar** con `$M done <id>`: ejecuta `./init.sh` (`--full` si el riesgo es medium o high), los criterios, el alcance, la revisión y comprueba que el contrato no cambió desde `start`. Si rechaza, no hay éxito: corrige o bloquea. Antes, rellena «Resumen» en `current.md`; `done` lo mueve a `history.md`.
 
-Si el contrato (risk, scope, criterios) debe cambiar durante el trabajo, edítalo y registra el cambio con `$M amend <id> --reason "…"`: queda en el historial e invalida la revisión previa. Ampliar alcance o rebajar riesgo es decisión del humano.
+Si el contrato (risk, scope, criterios) debe cambiar durante el trabajo, edítalo y registra el cambio con `$M amend <id> --reason "…"`: queda en el historial e invalida la revisión previa. Ampliar alcance o rebajar riesgo es decisión del humano (los hooks piden permiso antes de `amend`).
 
 Si no puedes continuar: `$M block <id> --reason "<qué bloquea · opciones · recomendación>"` y escala.
 

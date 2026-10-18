@@ -15,8 +15,9 @@ Feature: M-001 — Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y A
 
 ## Estado y próximos pasos
 
-- Hecho: CLI `core/monday.py`, método, roles, plantillas, adaptadores, 32 tests + `install_roundtrip.sh` en verde.
-- Siguiente: `docs/architecture.md`, `tests/e2e_adapters.sh` (claude -p / agy -p), README/CHANGELOG, revisión.
+- Hecho: fases I–V; 41 tests, `install_roundtrip.sh` y e2e 12/12 en verde (Claude Code + agy).
+- Revisión independiente (monday-reviewer, DEEP): ronda 1 changes_required (3 important, 5 minor) → corregidos con 8 regresiones; ronda 2 changes_required (huella sin base/preexisting; `amend` sin puerta humana) → corregidos.
+- Siguiente: ronda 3 de revisión → `monday done M-001` (ejecuta init.sh --full y AC4: e2e real).
 
 ## Bloqueos y errores
 
@@ -25,4 +26,7 @@ Feature: M-001 — Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y A
 
 ## Resumen para el historial
 
-<!-- Qué se hizo, decisiones tomadas y hallazgos fuera de alcance. Breve. -->
+- Monday 1.0.0 construido desde la guía normativa; AgentForge auditado como evidencia histórica (exploration_logs). Decisiones D-001…D-010 en docs/architecture.md.
+- La revisión independiente encontró 3 defectos importantes reales (rollback pisaba archivos fusionados; contrato de features.json manipulable sin rastro; anti-bucle del Stop roto por salidas variables) y uno en la 2.ª ronda (base del diff fuera de la huella); todos con test de regresión.
+- Hallazgos de plataforma: en agy `{}` deniega y `ask`/`force_ask` se autoaprueban en accept-edits → Monday usa `deny`.
+- Pendiente fuera de alcance: M-002 (Codex), M-003 (Antigravity IDE), validación interactiva del diálogo `ask` en Claude Code.

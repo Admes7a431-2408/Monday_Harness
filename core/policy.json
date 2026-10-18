@@ -24,6 +24,7 @@
     "\\b(docker|podman)\\s+push\\b",
     "\\b(curl|wget)\\b[^|]*\\|\\s*(sudo\\s+)?(ba|z)?sh\\b",
     "\\bchmod\\s+-R\\b",
-    "\\bdd\\s+if="
+    "\\bdd\\s+if=",
+    "monday\\.py\\s+amend\\b"
   ]
 }

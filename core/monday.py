@@ -24,7 +24,7 @@ FEATURE_KEYS = {"id", "title", "description", "status", "risk", "scope", "accept
                 "review_required", "depends_on", "notes",
                 # escritos por el CLI
                 "base", "preexisting", "started_at", "done_at", "blocked_reason", "review", "contract"}
-CONTRACT_KEYS = ("risk", "scope", "acceptance_criteria", "review_required", "depends_on")
+CONTRACT_KEYS = ("risk", "scope", "acceptance_criteria", "review_required", "depends_on", "base", "preexisting")
 CRITERION_KEYS = {"id", "text", "verify"}
 BLOCK_BEGIN, BLOCK_END = "<!-- monday:begin", "<!-- monday:end -->"
 REQUIRED_FILES = ("AGENTS.md", "init.sh", "features.json", "docs/architecture.md",
@@ -414,7 +414,6 @@ def cmd_start(a):
         raise MondayError(f"{a.id} depende de features no terminadas: {pending_deps}")
     if f["status"] == "pending":
         f["started_at"] = now()
-        f["contract"] = contract_hash(f)
         if git_available(root):
             f["base"] = head_or_empty(root)
             policy = load_policy()
@@ -422,6 +421,8 @@ def cmd_start(a):
             f["preexisting"] = {p: file_hash(root / p) for p in dirty}
             if dirty:
                 print(f"AVISO: {len(dirty)} archivo(s) ya modificados antes de empezar; no se atribuyen a {a.id} mientras no cambien")
+    if "contract" not in f:
+        f["contract"] = contract_hash(f)                  # tras fijar base/preexisting: también forman parte
     f["status"] = "in_progress"
     f.pop("blocked_reason", None)
     save_features(root, data)

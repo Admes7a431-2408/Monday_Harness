@@ -483,6 +483,25 @@ class ReviewRegressions(Base):
         self.assertIn("CONTRATO MODIFICADO", hist)
         self.assertIn("el humano rebajó el riesgo", hist)
 
+    def test_moving_diff_base_is_contract_tampering(self):
+        p = self.project()
+        p.add_feature(risk="high")
+        p.m("start", "F-001")
+        p.fix_bug()
+        p.write("README.md", "fuera de alcance\n")
+        p.commit("cuela un cambio")
+        data = p.features()
+        data["features"][0]["base"] = p.sh("git", "rev-parse", "HEAD").stdout.strip()
+        p.write("features.json", json.dumps(data, indent=2))
+        p.m("review", "F-001", "--verdict", "approve", "--by", "x")
+        r = p.m("done", "F-001")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("[FAIL] contract", r.stdout)
+
+    def test_amend_requires_human_permission(self):
+        p = self.project()
+        self.assertEqual(p.m("guard", "--cmd", "python3 .monday/monday.py amend F-001 --reason x").returncode, 3)
+
     def test_amend_invalidates_previous_review(self):
         p = self.project()
         p.add_feature(risk="high")
