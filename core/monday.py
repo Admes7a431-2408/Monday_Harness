@@ -281,6 +281,44 @@ def run_init(root, timeout, full=False):
     return ("FAIL" if status == "UNAVAILABLE" else status), detail
 
 
+def worktree_fingerprint(root):
+    """Huella de lo que difiere de HEAD (sin la memoria del harness); None sin git."""
+    if not git_available(root):
+        return None
+    policy = load_policy()
+    dirty = [p for p in changed_files(root, head_or_empty(root)) if not matches(p, policy["always_writable"])]
+    return fingerprint(root, dirty)
+
+
+def failing_checks(detail):
+    return sorted(l for l in detail.splitlines() if re.match(r"(FAIL|UNAVAILABLE|ERROR)\b", l))
+
+
+def record_verification(root, source, status, detail):
+    """Último resultado de init.sh y sobre qué árbol se obtuvo. Lo leen `status` y el inicio de sesión."""
+    path = root / ".monday" / "runtime" / "verification.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"at": now(), "source": source, "result": "GREEN" if status == "PASS" else "RED",
+                                "failing": failing_checks(detail) if status != "PASS" else [],
+                                "tree": worktree_fingerprint(root)}, ensure_ascii=False) + "\n")
+
+
+def verification_line(root):
+    path = root / ".monday" / "runtime" / "verification.json"
+    if not path.is_file():
+        return "Verificación: ninguna registrada — sin evidencia no hay éxito; ejecuta ./init.sh"
+    v = json.loads(path.read_text())
+    current = worktree_fingerprint(root)
+    if current is not None and v.get("tree") != current:
+        return (f"Verificación: DESACTUALIZADA — el árbol cambió desde la última ({v['result']}, {v['at']}); "
+                "sin evidencia del estado actual no hay éxito: ejecuta ./init.sh")
+    vigencia = "árbol actual" if current is not None else "sin git: vigencia no comprobable"
+    if v["result"] == "GREEN":
+        return f"Verificación: VERDE ({v['at']}, {v['source']}; {vigencia})"
+    return (f"Verificación: ROJO ({v['at']}, {v['source']}; {vigencia}) — fallan: {'; '.join(v['failing']) or 'init.sh'}. "
+            "El trabajo NO está terminado, diga lo que diga cualquier informe.")
+
+
 def check_project(root):
     errors, warnings = [], []
     for rel in REQUIRED_FILES:
@@ -357,6 +395,7 @@ def cmd_status(a, out=print):
     counts = {s: sum(1 for f in feats if f.get("status") == s) for s in STATUSES}
     out(f"Monday {VERSION} · {root}")
     out("Features: " + " · ".join(f"{s} {n}" for s, n in counts.items()))
+    out(verification_line(root))
     act = active_feature(data)
     if act:
         crit = act.get("acceptance_criteria", [])
@@ -526,6 +565,7 @@ def cmd_done(a):
     if f.get("contract") != contract_hash(f):
         checks.append(("contract", "FAIL", "risk/scope/criterios cambiaron desde `start` sin `monday amend`"))
     init_status, init_detail = run_init(root, a.timeout, full=f["risk"] != "low")
+    record_verification(root, "done", init_status, init_detail)
     checks.append(("init.sh", init_status, init_detail))
     results = verify_criteria(root, f, manual, a.timeout)
     for cid, status, cmd, detail in results:
@@ -670,15 +710,20 @@ def hook_stop(platform, payload, root):
         if not dirty:
             return None                                   # solo cambió la memoria (o nada): nada pudo romperse
     status, detail = run_init(root, timeout=600)
+    record_verification(root, f"hook stop ({platform})", status, detail)
     marker = root / ".monday" / "runtime" / "stop-block.json"
     if status == "PASS":
         marker.unlink(missing_ok=True)
         return None
     # Firma = qué comprobaciones fallan, no su salida (que incluye tiempos): el mismo fallo no bloquea dos veces.
-    failing = sorted(l for l in detail.splitlines() if re.match(r"(FAIL|UNAVAILABLE|ERROR)\b", l))
+    failing = failing_checks(detail)
     sig = sha256("\n".join(failing or [detail.splitlines()[0] if detail else ""]).encode())
     if marker.is_file() and json.loads(marker.read_text()).get("sig") == sig:
         marker.unlink()                                   # mismo fallo ya señalado: no bloquear en bucle
+        # La plataforma puede mostrar cualquier texto del modelo como resultado: la verdad queda en Monday.
+        append_history(root, f"## {now()[:10]} · SESIÓN TERMINADA CON init.sh EN ROJO ({platform})\n"
+                             f"- Fallan: {'; '.join(failing) or 'init.sh'}\n"
+                             "- Cualquier informe de éxito de esa sesión es falso hasta que `./init.sh` pase.")
         return None
     marker.parent.mkdir(parents=True, exist_ok=True)
     marker.write_text(json.dumps({"sig": sig, "at": now()}))

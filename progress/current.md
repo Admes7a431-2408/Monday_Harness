@@ -15,9 +15,10 @@ Feature: M-001 — Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y A
 
 ## Estado y próximos pasos
 
-- Hecho: fases I–V; 41 tests, `install_roundtrip.sh` y e2e 12/12 en verde (Claude Code + agy).
-- Revisión independiente (monday-reviewer, DEEP): ronda 1 changes_required (3 important, 5 minor) → corregidos con 8 regresiones; ronda 2 changes_required (huella sin base/preexisting; `amend` sin puerta humana) → corregidos.
-- Siguiente: ronda 3 de revisión → `monday done M-001` (ejecuta init.sh --full y AC4: e2e real).
+- Fases I–V hechas; revisión independiente aprobada en ronda 3; `done` rechazó por AC4 (agy) → feature reanudada para resolver AC4 reforzando el adaptador (decisión humana: opción 2, AC4 intacto).
+- Causa raíz (exploration_logs): agy -p devuelve el último texto del modelo con SUCCESS; ningún hook lo altera y el soft-deny no reinvoca Stop.
+- Corrección: estado de verificación persistido (`verification.json`) comunicado por `status`/inicio de sesión; sesión terminada en rojo → history.md; e2e AC4 juzga por estado verificable + escenario adversarial. 46 tests OK; las 5 nuevas fallan con el código anterior.
+- Siguiente: e2e real completa → revisión independiente de la corrección → `monday done M-001`.
 
 ## Bloqueos y errores
 

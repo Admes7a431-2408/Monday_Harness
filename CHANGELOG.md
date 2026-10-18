@@ -18,7 +18,8 @@ Primera versión definitiva de Monday. Reconstrucción completa: no comparte có
 - Adaptador Antigravity: `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`) y agentes en `.agents/agents/`.
 - Instalación que fusiona en vez de sobrescribir, actualización que se detiene ante ediciones locales y `rollback` (`--all` para desinstalar).
 - `monday amend`: los cambios de contrato de una feature en curso quedan registrados e invalidan la revisión.
-- 39 pruebas deterministas (escenarios S1–S8, distribución, integridad del diseño, regresiones de la revisión independiente), `tests/install_roundtrip.sh` y validación con agentes reales `tests/e2e_adapters.sh`.
+- Estado de verificación persistido (`.monday/runtime/verification.json`): `status` y el inicio de sesión comunican ROJO/VERDE/DESACTUALIZADA/ninguna; terminar una sesión en rojo queda en el historial.
+- 46 pruebas deterministas (escenarios S1–S8, distribución, integridad del diseño, regresiones de la revisión independiente, estado de verificación), `tests/install_roundtrip.sh` y validación con agentes reales `tests/e2e_adapters.sh`.
 
 ### Cambiado respecto a AgentForge
 

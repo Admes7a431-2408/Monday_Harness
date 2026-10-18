@@ -75,6 +75,7 @@ Devuelve: STATUS + ≤15 líneas
 - **Rápida vs completa:** `./init.sh` (integridad del harness + checks rápidos) antes de escribir código; `./init.sh --full` (suite completa, e2e/UI) la ejecuta `done` al cerrar features de riesgo medium/high.
 - **Bugs:** primero un repro que falle; después el arreglo; el mismo repro pasa a ser test de regresión.
 - **Al responder al humano:** di qué se ejecutó y qué no. «No verificado» dicho a tiempo vale más que un éxito ambiguo.
+- **El informe final de un agente no es evidencia** (algunas plataformas devuelven un texto anterior al último bloqueo): quien recibe el trabajo consulta `$M status` (línea «Verificación») o cierra con `$M done`. Sin verificación registrada sobre el árbol actual no hay éxito.
 
 ## 5. Gobernanza
 
@@ -100,7 +101,7 @@ Devuelve: STATUS + ≤15 líneas
 
 No dupliques: si un dato ya vive en uno de estos archivos, enlázalo. No conviertas cada acción en documentación: escribe lo que otro agente necesitaría para continuar.
 
-**Recuperación tras una interrupción.** `$M status` → lee `progress/current.md` → `git status`/`git diff` → `./init.sh` → continúa desde «Estado y próximos pasos». La conversación anterior no es necesaria; si lo fuera, la memoria estaba incompleta: corrígela.
+**Recuperación tras una interrupción.** `$M status` (incluye el último resultado de verificación y si sigue vigente) → lee `progress/current.md` → `git status`/`git diff` → `./init.sh` → continúa desde «Estado y próximos pasos». La conversación anterior no es necesaria; si lo fuera, la memoria estaba incompleta: corrígela.
 
 ## 7. Capacidades y alternativas
 

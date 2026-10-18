@@ -554,6 +554,79 @@ class ReviewRegressions(Base):
         self.assertEqual(r.stdout.strip(), "")
 
 
+# ---------------------------------------------------------------- AC4: el cierre lo decide la verificación, no el informe
+
+class VerificationState(Base):
+    """El agente puede terminar con cualquier texto (agy devuelve el último del modelo y SUCCESS):
+    el estado verificado se persiste, se comunica y es lo único que decide el cierre."""
+
+    def stop(self, p, plat="antigravity"):
+        payload = {"workspacePaths": [str(p.dir)]} if plat == "antigravity" else {"cwd": str(p.dir)}
+        return p.m("hook", "stop", "--platform", plat, inp=json.dumps(payload))
+
+    def red_project(self):
+        p = self.project()
+        p.add_feature()
+        p.write("init.sh", p.read("init.sh").replace('  # "npm run lint"', '  "python3 -B -c \'import sys; sys.path.insert(0, \\"src\\"); import calc; assert calc.add(2, 3) == 5\'"'))
+        p.commit("init con check del bug")
+        p.m("start", "F-001")
+        p.write("src/calc.py", "# revisado\n" + p.read("src/calc.py"))   # el agente toca, pero no arregla
+        return p
+
+    def test_green_verification_allows_closure(self):
+        p = self.project()
+        p.add_feature()
+        p.m("start", "F-001")
+        p.fix_bug()
+        self.assertEqual(self.stop(p).stdout.strip(), "", "en verde el hook no bloquea")
+        self.assertIn("Verificación: VERDE", p.m("status").stdout)
+        self.assertEqual(p.m("done", "F-001").returncode, 0)
+
+    def test_red_session_ending_with_success_claim_cannot_close(self):
+        p = self.red_project()
+        self.assertEqual(json.loads(self.stop(p).stdout)["decision"], "continue")
+        # el agente responde «todo correcto» y vuelve a parar: la plataforma lo deja terminar…
+        self.assertEqual(self.stop(p).stdout.strip(), "")
+        # …pero el estado verificado queda persistido y comunicado, y el cierre se rechaza
+        hist = p.read("progress/history.md")
+        self.assertIn("SESIÓN TERMINADA CON init.sh EN ROJO (antigravity)", hist)
+        status = p.m("status").stdout
+        self.assertIn("Verificación: ROJO", status)
+        self.assertIn("NO está terminado", status)
+        start = json.loads(p.m("hook", "session-start", "--platform", "antigravity",
+                               inp=json.dumps({"workspacePaths": [str(p.dir)]})).stdout)
+        self.assertIn("Verificación: ROJO", start["injectSteps"][0]["systemMessage"]["systemMessage"])
+        r = p.m("done", "F-001")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("[FAIL] init.sh", r.stdout)
+
+    def test_platform_termination_without_second_stop_still_red(self):
+        p = self.red_project()
+        self.stop(p, plat="claude")                    # un solo Stop: la plataforma corta sin volver a llamarlo
+        self.assertIn("Verificación: ROJO", p.m("status").stdout)
+        self.assertEqual(p.m("done", "F-001").returncode, 1)
+
+    def test_absent_or_stale_evidence_is_not_success(self):
+        p = self.project()
+        p.write("src/calc.py", "def add(a, b):\n    return a + b\n")
+        self.assertIn("ninguna registrada", p.m("status").stdout)
+        self.stop(p)
+        self.assertIn("Verificación: VERDE", p.m("status").stdout)
+        p.write("src/otro.py", "x = 1\n")
+        self.assertIn("DESACTUALIZADA", p.m("status").stdout)
+
+    def test_missing_init_is_red_not_success(self):
+        p = self.project()
+        p.add_feature()
+        p.m("start", "F-001")
+        p.fix_bug()
+        (p.dir / "init.sh").unlink()
+        r = p.m("done", "F-001")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("init.sh no existe", r.stdout)
+        self.assertIn("Verificación: ROJO", p.m("status").stdout)
+
+
 # ---------------------------------------------------------------- integridad del diseño
 
 class DesignIntegrity(unittest.TestCase):

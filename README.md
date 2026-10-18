@@ -32,7 +32,7 @@ Los hooks de cada plataforma añaden tres garantías: el estado del proyecto se 
 
 - Python 3 (solo biblioteca estándar; probado con 3.14, requiere ≥ 3.8), Bash.
 - git (recomendado: sin git, el alcance y la revisión exigen evidencia manual).
-- Claude Code y/o Antigravity CLI para los adaptadores.
+- Claude Code y/o Antigravity CLI para los adaptadores. En Antigravity headless (`agy -p`), para que el agente pueda ejecutar `./init.sh` hay que añadir `command(./init.sh)` a `permissions.allow` de `~/.gemini/antigravity-cli/settings.json` (configuración global; Monday no la toca).
 
 ## Instalar, actualizar y revertir
 
@@ -89,7 +89,7 @@ Otra plataforma (Codex, Cursor…) se añade con una carpeta en `adapters/` y un
 ## Probar Monday desde cero
 
 ```bash
-./init.sh                                   # harness de este repo + 39 pruebas (escenarios S1–S8, distribución, diseño, regresiones)
+./init.sh                                   # harness de este repo + 46 pruebas (escenarios S1–S8, distribución, diseño, regresiones)
 bash tests/install_roundtrip.sh             # instalar → init.sh → reinstalar → rollback --all deja el directorio vacío
 bash tests/e2e_adapters.sh claude           # agentes reales (consume tokens; requiere sesión iniciada)
 bash tests/e2e_adapters.sh antigravity
@@ -115,6 +115,7 @@ Este repositorio usa Monday para sí mismo: `.monday` apunta a `core/` y su trab
 
 - Los hooks interceptan las herramientas de edición y los comandos de `policy.json`; un comando de shell que escribe archivos fuera de alcance no se detecta hasta `monday done`.
 - `features.json` es un archivo editable: Monday detecta incoherencias de forma, no la mala fe. El autor de una revisión (`--by`) es declarativo.
+- El texto final de un agente no es evidencia: `agy -p` puede devolver un texto anterior a un bloqueo con `status: SUCCESS`. Juzga el resultado con `monday status` (línea «Verificación») o `monday done`.
 - En Antigravity, lo fuera de alcance se **deniega** (no hay un «preguntar» fiable en modo `accept-edits`): el humano amplía el `scope` o ejecuta la acción.
 - En un monorepo con Monday en un subdirectorio, el alcance solo mira ese subdirectorio, y los archivos en `.gitignore` no cuentan como cambios.
 - Probado en Linux. macOS debería funcionar (Bash + Python); Windows no está soportado.
