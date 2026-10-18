@@ -55,7 +55,15 @@
       "preexisting": {
         "Arquitectura Óptima de Arnés para Agentes IA.md": "313acab04c8e28f36900dcaa65fcfc4bf2ae6fe6b2eaa8e362de29bb89dbda53"
       },
-      "contract": "7c3057af043952fee9ae16e24fd210b383833fbdcb0076dca8e8fdc0cf3c21ca"
+      "contract": "7c3057af043952fee9ae16e24fd210b383833fbdcb0076dca8e8fdc0cf3c21ca",
+      "review": {
+        "verdict": "approve",
+        "by": "monday-reviewer",
+        "at": "2026-10-18T17:24:13-04:00",
+        "fingerprint": "3846564ae2061f07877b3eb8e493caa96611661461e1545fb98c24b717939069",
+        "files": 37,
+        "notes": "Ronda 3 (b1735d9..b0d25c2): (a) base/preexisting en la huella de contrato, calculada tras fijarlos: addressed (test de regresión, huella de M-001 coherente); (b) amend en ask_commands: addressed. Minor pendiente: la guarda no ve 'M=\"python3 .monday/monday.py\"; $M amend …' (convención $M de method.md), que devuelve OK. 39 tests OK; AC4 lo ejecutó el líder (unos 5 min)."
+      }
     },
     {
       "id": "M-002",
@@ -79,6 +87,18 @@
       "scope": [
         "adapters/antigravity/**",
         "docs/**"
+      ],
+      "acceptance_criteria": []
+    },
+    {
+      "id": "M-004",
+      "title": "La guarda de comandos reconoce `amend` invocado vía alias (`$M amend`)",
+      "description": "Minor de la 3.ª revisión de M-001: policy.json solo intercepta 'monday.py amend'.",
+      "status": "pending",
+      "risk": "low",
+      "scope": [
+        "core/policy.json",
+        "tests/**"
       ],
       "acceptance_criteria": []
     }

@@ -29,4 +29,5 @@ Feature: M-001 — Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y A
 - Monday 1.0.0 construido desde la guía normativa; AgentForge auditado como evidencia histórica (exploration_logs). Decisiones D-001…D-010 en docs/architecture.md.
 - La revisión independiente encontró 3 defectos importantes reales (rollback pisaba archivos fusionados; contrato de features.json manipulable sin rastro; anti-bucle del Stop roto por salidas variables) y uno en la 2.ª ronda (base del diff fuera de la huella); todos con test de regresión.
 - Hallazgos de plataforma: en agy `{}` deniega y `ask`/`force_ask` se autoaprueban en accept-edits → Monday usa `deny`.
+- Revisión ronda 3: approve (monday-reviewer). Minor diferido a M-004 (guarda de `amend` vía alias).
 - Pendiente fuera de alcance: M-002 (Codex), M-003 (Antigravity IDE), validación interactiva del diálogo `ask` en Claude Code.

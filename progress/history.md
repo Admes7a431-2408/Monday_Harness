@@ -17,3 +17,6 @@ Registro de cierres (`DONE`), rechazos, bloqueos y revisiones con su evidencia. 
 - Motivo: La huella ahora incluye base/preexisting (2.ª ronda de revisión); contrato de M-001 sin cambios.
 - Ahora: risk high · scope core/**, adapters/**, tests/**, docs/**, AGENTS.md, CLAUDE.md, README.md, CHANGELOG.md, LICENSE, init.sh, install.sh, .gitignore, .monday, .claude/**, .agents/** · criterios AC1, AC2, AC3, AC4, AC5 (manual)
 - La revisión previa queda invalidada
+
+## 2026-10-18 · M-001 · RECHAZADO
+- init.sh PASS · AC1 PASS · AC2 PASS · AC3 PASS · AC4 FAIL · AC5 MANUAL · scope PASS · review PASS
