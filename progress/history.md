@@ -20,3 +20,6 @@ Registro de cierres (`DONE`), rechazos, bloqueos y revisiones con su evidencia. 
 
 ## 2026-10-18 · M-001 · RECHAZADO
 - init.sh PASS · AC1 PASS · AC2 PASS · AC3 PASS · AC4 FAIL · AC5 MANUAL · scope PASS · review PASS
+
+## 2026-10-18 · M-001 · BLOQUEADA
+- AC4 FAIL no determinista: en una de dos tandas e2e, el agente de Antigravity (gemini-3.8-flash-medium), tras el bloqueo del hook Stop, terminó con init.sh en rojo afirmando éxito. El hook funcionó (bloqueó); la honestidad del informe final depende del modelo. Opciones: (1) amend AC4 separando garantía determinista del comportamiento del modelo y documentarlo como limitación de agy; (2) reforzar el adaptador agy (p. ej. segundo bloqueo o PostInvocation) y revalidar; (3) usar un modelo más capaz en e2e. Recomendación: (1)+(documentar), decisión humana porque rebaja un criterio.

@@ -5,7 +5,7 @@
       "id": "M-001",
       "title": "Monday 1.0.0: núcleo agnóstico, adaptadores Claude Code y Antigravity, distribución reversible y validación",
       "description": "Primera versión definitiva reconstruida desde la guía normativa y la evidencia histórica de AgentForge (progress/exploration_logs.md).",
-      "status": "in_progress",
+      "status": "blocked",
       "risk": "high",
       "scope": [
         "core/**",
@@ -63,7 +63,8 @@
         "fingerprint": "3846564ae2061f07877b3eb8e493caa96611661461e1545fb98c24b717939069",
         "files": 37,
         "notes": "Ronda 3 (b1735d9..b0d25c2): (a) base/preexisting en la huella de contrato, calculada tras fijarlos: addressed (test de regresión, huella de M-001 coherente); (b) amend en ask_commands: addressed. Minor pendiente: la guarda no ve 'M=\"python3 .monday/monday.py\"; $M amend …' (convención $M de method.md), que devuelve OK. 39 tests OK; AC4 lo ejecutó el líder (unos 5 min)."
-      }
+      },
+      "blocked_reason": "AC4 FAIL no determinista: en una de dos tandas e2e, el agente de Antigravity (gemini-3.8-flash-medium), tras el bloqueo del hook Stop, terminó con init.sh en rojo afirmando éxito. El hook funcionó (bloqueó); la honestidad del informe final depende del modelo. Opciones: (1) amend AC4 separando garantía determinista del comportamiento del modelo y documentarlo como limitación de agy; (2) reforzar el adaptador agy (p. ej. segundo bloqueo o PostInvocation) y revalidar; (3) usar un modelo más capaz en e2e. Recomendación: (1)+(documentar), decisión humana porque rebaja un criterio."
     },
     {
       "id": "M-002",
