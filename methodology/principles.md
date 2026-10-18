@@ -1,6 +1,6 @@
 # Principios
 
-Fuente única de las reglas globales de AgentForge. Ningún otro archivo las redefine; los demás las referencian por su identificador (`P1`…`P12`).
+Fuente única de las reglas globales de Monday. Ningún otro archivo las redefine; los demás las referencian por su identificador (`P1`…`P12`).
 
 El rigor es proporcional al problema: estos principios se aplican siempre, pero su *coste* (cuánto se escribe, cuánto se verifica) escala con el nivel y el riesgo de la tarea (ver [routing.md](routing.md)).
 

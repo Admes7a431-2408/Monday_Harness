@@ -1,8 +1,9 @@
-# AgentForge — Final Report
+# Monday — Final Report
 # Todo trabajo relevante (L2+) lo produce; en L0–L1 basta "qué cambió + cómo se verificó".
 # Nunca declarar éxito porque los comandos terminaron: status refleja la evidencia (P6).
 
-contract: AF-0000-short-slug      # o "none" en L0
+schema: 1                            # versión de especificación del reporte (1 = Monday v1.0)
+contract: MON-0000-short-slug      # o "none" en L0
 task: >
   ...
 status: DONE                      # DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED | ESCALATE | FAILED (routing.md §4)
@@ -11,7 +12,7 @@ verified: true                    # false si alguna gate necesaria quedó not_ru
 route:                            # traza de routing (sustituye a un log separado)
   - "Route: L2 · STANDARD · risk medium · delegate + review(DEEP)"
 delegations:                      # una línea por encargo: a quién, tier, resultado, cómo se verificó
-  - "scout FAST: localizar usos de X → accepted (3 citas comprobadas)"
+  - "monday-scout FAST: localizar usos de X → accepted (3 citas comprobadas)"
 
 what_changed: >
   ...

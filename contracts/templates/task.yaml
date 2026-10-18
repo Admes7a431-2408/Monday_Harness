@@ -1,8 +1,9 @@
-# AgentForge — Task Contract
+# Monday — Task Contract
 # Autoridad de un trabajo delegado (methodology/governance.md). Escribe solo los campos que aportan.
 # [L2] = obligatorio desde L2 (contrato ligero) · [L3] = obligatorio desde L3 · resto opcional.
 
-id: AF-0000-short-slug            # [L2] único; aparece en el reporte y en commits
+schema: 1                            # versión de especificación del contrato (1 = Monday v1.0)
+id: MON-0000-short-slug            # [L2] único; aparece en el reporte y en commits
 parent: null                      # id del contrato padre (L4 / sub-orquestación)
 level: L2                         # [L2] L0..L5 (methodology/routing.md §1)
 risk: medium                      # [L2] low | medium | high | critical
@@ -11,7 +12,7 @@ objective: >                      # [L2] una frase verificable: qué resultado, 
   ...
 
 context:                          # [L3] punteros, no copias
-  read_first: []                  # rutas: .agentforge/CONTEXT.md, specs, código relevante
+  read_first: []                  # rutas: .monday/CONTEXT.md, specs, código relevante
   background: >
     ...
   interfaces:                     # [L2+, risk ≥ medium] obligatorio (Interface Integrity Gate, AD-011)
@@ -33,7 +34,7 @@ permissions:
     ask: []                       # requiere confirmación humana
     deny: []                      # p.ej. "git push", "rm -rf"
   network: false
-  write_memory: false             # ¿puede editar .agentforge/CONTEXT.md / decisions.md?
+  write_memory: false             # ¿puede editar .monday/CONTEXT.md / decisions.md?
 
 constraints: []                   # restricciones globales copiadas literalmente (no parafraseadas)
 
@@ -51,7 +52,7 @@ human_gates: []                   # acciones que exigen parar y preguntar, adem�
 
 deliverables:
   - code changes
-  - report: .agentforge/reports/AF-0000-short-slug.yaml
+  - report: .monday/reports/MON-0000-short-slug.yaml
 
 routing:
   mode: delegate                  # direct | delegate | parallel

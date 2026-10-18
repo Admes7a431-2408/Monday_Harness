@@ -2,13 +2,13 @@
 
 Separa dos memorias que nunca se mezclan:
 
-- **La metodología** (este repositorio AgentForge): cómo se trabaja. Igual para todos los proyectos.
-- **La memoria del proyecto** (`.agentforge/` en la raíz de cada proyecto): qué significa cada cosa *en ese proyecto*, qué se decidió y qué no se puede romper. Es la fuente única de verdad que cualquier agente lee al empezar y que sobrevive a las conversaciones (P12).
+- **La metodología** (este repositorio Monday): cómo se trabaja. Igual para todos los proyectos.
+- **La memoria del proyecto** (`.monday/` en la raíz de cada proyecto): qué significa cada cosa *en ese proyecto*, qué se decidió y qué no se puede romper. Es la fuente única de verdad que cualquier agente lee al empezar y que sobrevive a las conversaciones (P12).
 
 ## Estructura en el proyecto
 
 ```
-<proyecto>/.agentforge/
+<proyecto>/.monday/
 ├── CONTEXT.md        # glosario, términos de dominio y restricciones importantes
 ├── decisions.md      # decisiones de arquitectura (ADR breves)
 ├── learnings.md      # aprendizajes del proceso en este proyecto (opcional)
@@ -59,8 +59,8 @@ Ante una señal, el reporte incluye `learnings` con: qué funcionó · qué fall
 
 | Alcance | Dónde | Quién decide |
 |---|---|---|
-| Este proyecto | `.agentforge/learnings.md`, `CONTEXT.md` o reglas del proyecto | Orchestrator / humano |
-| Mapeo de modelos | `routing/profiles.yaml` de AgentForge | Humano |
-| La metodología | Propuesta en `docs/decisions.md` de AgentForge, con la evidencia | Humano |
+| Este proyecto | `.monday/learnings.md`, `CONTEXT.md` o reglas del proyecto | Orchestrator / humano |
+| Mapeo de modelos | `routing/profiles.yaml` de Monday | Humano |
+| La metodología | Propuesta en `docs/decisions.md` de Monday, con la evidencia | Humano |
 
 Los agentes **proponen** cambios a la metodología; nunca la editan como efecto secundario de una tarea. Una regla nueva entra solo si responde "sí" al principio rector: ¿produce software más correcto, verificable y mantenible con menos errores, menos desperdicio de contexto y menos intervención humana innecesaria?

@@ -28,7 +28,7 @@ De intención humana a trabajo verificado. Cada fase tiene un producto y un crit
 3. **Diseñar** (L3+). La solución más simple que cumple (P3). Registra solo las decisiones difíciles de revertir.
 4. **Descomponer** (L3+). Unidades que un ejecutor puede completar en un contexto fresco, cada una verificable por sí misma y preferiblemente vertical (atraviesa las capas necesarias y se puede demostrar sola). Prepara primero lo que haga fácil el cambio. Declara dependencias (`dependencies`); la *frontera* son las unidades sin dependencias pendientes. Para cambios mecánicos de gran radio, usa expand → migrate → contract en vez de cortes verticales.
 5. **Enrutar.** Una línea `Route:` por unidad: tier del ejecutor, si se paraleliza, quién revisa.
-6. **Contratar.** Un contrato por unidad. El contrato contiene las decisiones que el ejecutor no puede tomar solo (interfaces que consume y produce —incluido cualquier cambio de firma o de forma de datos; obligatorio desde L2 con risk ≥ medium: `interfaces: none_modified` o `consumes`/`produces` no vacíos—, restricciones globales copiadas literalmente, seams de test, criterios de aceptación), no el código. Un contrato más largo que el código que describe ya ha escrito el código. Comprueba contra el repo lo que escribes (P2): los comandos de verificación existen y se ejecutan, las rutas de `scope` son concretas y las zonas sensibles cercanas están en `excluded_areas`, el `id` es el siguiente libre en `.agentforge/contracts/`. Valida con `af.py validate`.
+6. **Contratar.** Un contrato por unidad. El contrato contiene las decisiones que el ejecutor no puede tomar solo (interfaces que consume y produce —incluido cualquier cambio de firma o de forma de datos; obligatorio desde L2 con risk ≥ medium: `interfaces: none_modified` o `consumes`/`produces` no vacíos—, restricciones globales copiadas literalmente, seams de test, criterios de aceptación), no el código. Un contrato más largo que el código que describe ya ha escrito el código. Comprueba contra el repo lo que escribes (P2): los comandos de verificación existen y se ejecutan, las rutas de `scope` son concretas y las zonas sensibles cercanas están en `excluded_areas`, el `id` es el siguiente libre en `.monday/contracts/`. Valida con `monday.py validate`.
 7. **Delegar** la frontera, con el contrato ya commiteado: `check-scope` lee el alcance desde `--base` y falla si el contrato no está en git, así el ejecutor no puede autoexpandirlo; en paralelo solo unidades con alcances disjuntos, cada una con escritura en su propio worktree. Anota el commit de partida de cada unidad: es el `--base` de su `check-scope`.
 8. **Verificar e integrar** cada resultado (P9, [routing.md §5](routing.md#5-verificar-lo-delegado-p9)); al desbloquearse unidades, la frontera avanza.
 9. **Revisar** el conjunto integrado (G8) cuando hay más de una unidad.
@@ -38,7 +38,7 @@ De intención humana a trabajo verificado. Cada fase tiene un producto y un crit
 
 ### Antes
 
-1. Lee el contrato completo y la memoria del proyecto que referencia (`.agentforge/CONTEXT.md`, decisiones). Respeta su vocabulario.
+1. Lee el contrato completo y la memoria del proyecto que referencia (`.monday/CONTEXT.md`, decisiones). Respeta su vocabulario.
 2. Inspecciona el código afectado antes de editar. Comprueba que el contrato es coherente con lo que ves.
 3. Si falta información que bloquea o el contrato se contradice con el código: `NEEDS_CONTEXT` / escala antes de empezar, no a mitad.
 4. Emite tu `Route:` (puedes tener subtareas para otros tiers) y, si hay más de 2 pasos, un plan `paso → verificación`.
@@ -47,7 +47,7 @@ De intención humana a trabajo verificado. Cada fase tiene un producto y un crit
 
 - **Primero el feedback loop.** Antes de cambiar comportamiento, consigue un comando que demuestre el estado actual y pueda fallar ante el defecto o la ausencia de la funcionalidad (test, curl, CLI con fixture, script). Para bugs es obligatorio: sin un repro ejecutado al menos una vez no hay hipótesis; si no se puede construir, detente y pide acceso, artefactos o permiso para instrumentar.
 - **TDD cuando aplica** (cambio de comportamiento + harness de tests): rojo → verde, un test por ciclo, en los seams que nombra el contrato (o el seam existente más alto que lo cubra). Tests por la interfaz pública; nada de tests que recalculan el resultado como el código.
-- **Debugging:** reproduce → minimiza → 3–5 hipótesis falsables ordenadas ("si X es la causa, cambiar Y hará que…") → una variable por sonda → fix con test de regresión. Marca los logs temporales con un prefijo único (`[AF-DEBUG]`) para eliminarlos con una búsqueda. Si no existe un seam correcto para el test de regresión, eso es un hallazgo de arquitectura que se reporta.
+- **Debugging:** reproduce → minimiza → 3–5 hipótesis falsables ordenadas ("si X es la causa, cambiar Y hará que…") → una variable por sonda → fix con test de regresión. Marca los logs temporales con un prefijo único (`[MON-DEBUG]`) para eliminarlos con una búsqueda. Si no existe un seam correcto para el test de regresión, eso es un hallazgo de arquitectura que se reporta.
 - **Pasos pequeños:** typecheck/tests de archivo a menudo; suite relevante al final.
 - **Alcance:** cada línea trazable al contrato (P4, P7). Decisiones menores → ruling; lo demás → [desviaciones](governance.md#desviaciones).
 

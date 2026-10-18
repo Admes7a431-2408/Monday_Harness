@@ -1,0 +1,102 @@
+contract: none (orden de cierre del usuario, 2026-10-13; sin contrato YAML)
+task: >
+  Cierre técnico del endurecimiento y la migración a af-reviewer/af-scout/af-worker:
+  auditar el trabajo sin confirmar sobre 67b215f, corregir los defectos reproducibles con test previo,
+  verificar instalador, agentes, puentes y copias de respaldo, y documentar con evidencia.
+  Fuera de alcance y sin tocar: Sistema_Facturacion (POSTventa), puentes ask-antigravity.sh/ask-claude.sh, git (sin commits).
+status: DONE
+verified: true
+
+route:
+  - "Route: L2 · DEEP · risk high · direct + review(DEEP af-reviewer, 2 rondas)"
+
+delegations:
+  - "af-reviewer DEEP (opus/high), ronda 1: 6 hallazgos (3 bloqueantes) → 3 corregidos con test, 1 autorizado por la orden, 1 de reporte, 1 aceptado como diseño"
+  - "af-reviewer DEEP (opus/high), ronda 2: approve en contrato y calidad; reprodujo sus 3 casos sobre el código nuevo"
+
+what_changed: >
+  Estado inicial (heredado y conservado): 5 archivos modificados sin confirmar (install.sh --check/--purge-legacy,
+  af.py is_safe_rel_path y detección de symlinks, profiles.yaml sin 'existing', README del adaptador, 26 tests);
+  56 tests OK; install.sh --check sano. Defectos corregidos en esta ejecución, cada uno con un test que fallaba antes:
+  (1) af.py: el relleno con espacios evadía la validación de rutas (" /etc/passwd", " ../x", "\t..\\x", "src/ .. /x");
+      ahora se valida la cadena original, su forma efectiva (glob_re hace strip) y cada segmento sin espacios.
+  (2) af.py: un scope mal tipado (string, [123], [null], lista en vez de mapping) producía Traceback; ahora scope_lists()
+      lo reporta como error en validate y como error de configuración (código 2) en check-scope.
+  (3) af.py check-scope: un symlink interno cuyo destino real caía en excluded_areas o fuera de allowed pasaba G5;
+      ahora es "SECURITY VIOLATION (symlink resolves out of scope)" y cuenta como fuera de alcance.
+  (4) af.py check-scope: el contrato y los entregables exentos (reporte, memoria) se excluían antes de los chequeos de seguridad;
+      un reporte o contrato enlazado fuera del repo daba pass. Ahora se comprueban antes de excluirlos (hallazgo del revisor).
+  (5) af.py check-scope: falso positivo de "symlink escape" con nombres legítimos que empiezan por ".." ("..notes/"); relpath normalizado a '/'.
+  (6) install.sh --purge-legacy: validaba y borraba objetivo por objetivo; con reviewer.md regular y scout.md como symlink
+      borraba reviewer.md antes de abortar. Ahora tiene 3 fases: precondiciones sin tocar nada (incluye que los archivos sean legibles),
+      respaldo de todos en un directorio nuevo (mkdir atómico) verificado con cmp, y borrado con rm -f
+      revalidando cada archivo y comprobando que desapareció. Si un borrado falla → INCOMPLETA y código 1.
+  (7) install.sh: rm sin -f preguntaba en archivos 444 y, si se respondía "n", informaba éxito (hallazgo del revisor; reproducido con pty).
+  (8) install.sh: para purgar, antes solo se miraba el destino del enlace; ahora agent_ok exige un archivo regular legible
+      cuyo frontmatter declare name: igual al nombre, que es lo que registra Claude Code. --check usa la misma comprobación.
+  (9) install.sh: se rechazan la purga sobre un ~/.claude/agents enlazado y las combinaciones de --check/--purge-legacy con flags de plataforma;
+      --check usa python3 -B.
+  (10) Docs: docs/usage.md ofrecía scout/worker/reviewer como alternativa y la plantilla report.yaml usaba "scout";
+      el bloque de git clone del README tenía un enlace Markdown, con lo que el comando copiado no funcionaba;
+      se documentan --check, --purge-legacy y sus garantías reales; CHANGELOG [Unreleased].
+
+files_affected:
+  - scripts/af.py
+  - install.sh
+  - tests/test_agentforge.py
+  - routing/profiles.yaml
+  - README.md
+  - CHANGELOG.md
+  - docs/usage.md
+  - adapters/claude-code/README.md
+  - contracts/templates/report.yaml
+  - .agentforge/reports/AF-0024-legacy-migration-closure.yaml
+
+interface_changes:
+  - "routing/profiles.yaml: platforms.claude-code.agents.* pierde la clave 'existing' (scout/worker/reviewer); autorizado por la orden (retirada de referencias heredadas); ningún consumidor dentro del repo la leía"
+  - "install.sh: nuevos flags --check y --purge-legacy; --check/--purge-legacy/--uninstall mutuamente excluyentes; --check/--purge-legacy con --claude/--antigravity/--agents → código 2"
+  - "install.sh --purge-legacy: salidas 'Purga legacy completada con éxito' (0), 'Purga legacy INCOMPLETA' (1), errores de precondición (1, sin cambios)"
+  - "af.py validate: rechaza scope mal tipado y reglas absolutas, con unidad, UNC o '..' en allowed_files, allowed_directories y excluded_areas (antes las aceptaba)"
+  - "af.py check-scope: nuevas líneas 'SECURITY VIOLATION (scope rule escapes repo | path traversal outside repo | symlink escape outside repo | symlink resolves out of scope)' y 'OUT OF SCOPE (security_violation)'; scope mal tipado → código 2 'invalid contract scope'"
+
+tests_executed:
+  - command: "python3 -m unittest discover -s tests (estado heredado)"
+    result: "Ran 56 tests — OK"
+  - command: "python3 -m unittest discover -s tests (tests nuevos, antes de corregir)"
+    result: "Ran 82 tests — FAILED (failures=37); ronda 2: Ran 87 — FAILED (failures=4); el test pty falla con el rm antiguo"
+  - command: "python3 -m unittest discover -s tests -v"
+    result: "Ran 87 tests — OK (exit 0)"
+  - command: "./install.sh --check (HOME real, solo lectura)"
+    result: "Estado global: COMPLETO Y SALUDABLE (exit 0)"
+  - command: "git diff --check"
+    result: "sin salida (exit 0)"
+  - command: "bash -n install.sh"
+    result: "exit 0 (shellcheck no está instalado en el equipo)"
+  - command: "python3 scripts/af.py validate contracts/examples/*.yaml .agentforge/contracts/*.yaml"
+    result: "exit 0; único aviso, preexistente: broad scope 'tests/' en AF-0022"
+
+verification_results:
+  - gate: G1
+    result: pass
+    evidence: "87/87 tests; los 31 nuevos de esta ejecución fallaban antes de su corrección (rojo documentado arriba)."
+  - gate: G6
+    result: pass
+    evidence: "POSTventa: HEAD 02a57bd, git status (243 entradas), sha256 del diff y de los 243 archivos sucios o sin rastrear idénticos antes y después. Puentes, ~/.claude/CLAUDE.md y settings.json con el mismo sha256. 12 respaldos de migración y de settings idénticos. Enlaces de ~/.claude y ~/.gemini idénticos. Sin commits (HEAD de AgentForge en 67b215f)."
+  - gate: G8
+    result: pass
+    evidence: "af-reviewer (opus/high), ronda 2: 'Contrato: approve · Calidad: approve'; reprodujo r1 (reporte enlazado fuera del repo → rc 1), r2 (contrato sustituido por un symlink → rc 1) y r3 (pty, 444 → purgado sin pregunta)."
+
+rulings:
+  - "is_safe_rel_path rechaza 'a:b.txt' a propósito: en Windows es una ruta relativa a la unidad A:. Falla hacia el lado seguro."
+contract_deviations:
+  - "Las rutas de los puentes que da la orden no existen; los puentes reales están en ~/.claude/skills/antigravity/scripts/ask-antigravity.sh y ~/.gemini/config/skills/claude/scripts/ask-claude.sh, y son los que se protegieron y verificaron."
+unexpected_findings:
+  - "~/.claude/CLAUDE.md ya estaba migrado a af-* en disco; la copia cargada al empezar la sesión era la antigua."
+  - "Los ~/.claude/backups/.claude.json.backup.* rotan solos (Claude Code conserva 5); no son respaldos de la migración."
+  - "Los agentes scout, worker y reviewer visibles en sesiones de POSTventa son agentes de proyecto de Sistema_Facturacion/.claude/agents, no residuos globales; quedan fuera de alcance."
+remaining_risks:
+  - "G5 (check-scope), por diseño previo, solo ve cambios visibles para git: un symlink o archivo creado en una ruta ignorada por .gitignore no se inspecciona. Está documentado en el CHANGELOG."
+follow_up_recommendations: []
+learnings:
+  - "Validar la forma efectiva de un patrón (tras strip/normalización) además de la cadena original."
+  - "Una purga con varios objetivos debe validar todos antes de tocar ninguno y juzgar el borrado por su efecto, no por el código de salida."

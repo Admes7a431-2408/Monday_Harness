@@ -1,6 +1,6 @@
 # <Proyecto> — Context
 
-Fuente única de verdad del lenguaje y las restricciones del proyecto. Lo mantienen el orchestrator y el humano; los demás agentes proponen cambios en sus reportes. Formato: AgentForge `methodology/knowledge.md`.
+Fuente única de verdad del lenguaje y las restricciones del proyecto. Lo mantienen el orchestrator y el humano; los demás agentes proponen cambios en sus reportes. Formato: Monday `methodology/knowledge.md`.
 
 ## Glossary
 
@@ -13,5 +13,5 @@ _Evitar_: <sinónimos que no se usan>
 
 ## Pointers
 
-- Decisiones: `.agentforge/decisions.md`
+- Decisiones: `.monday/decisions.md`
 - <Otra fuente de verdad existente>: `<ruta>`

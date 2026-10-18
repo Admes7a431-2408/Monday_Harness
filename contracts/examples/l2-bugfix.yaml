@@ -1,5 +1,6 @@
 # Ejemplo L2: bug con riesgo medio. Contrato ligero + revisión independiente.
-id: AF-0007-discount-rounding
+schema: 1
+id: MON-0007-discount-rounding
 level: L2
 risk: medium
 
@@ -9,7 +10,7 @@ objective: >
 
 context:
   read_first:
-    - .agentforge/CONTEXT.md          # define "Invoice", "Line", "Discount"
+    - .monday/CONTEXT.md          # define "Invoice", "Line", "Discount"
     - src/billing/totals.py
     - tests/billing/test_totals.py
   interfaces: none_modified           # firma pública de compute_total() intacta
@@ -45,7 +46,7 @@ verification:
 
 deliverables:
   - code changes
-  - report: .agentforge/reports/AF-0007-discount-rounding.yaml
+  - report: .monday/reports/MON-0007-discount-rounding.yaml
 
 routing:
   mode: delegate

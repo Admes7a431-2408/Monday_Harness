@@ -13,7 +13,7 @@
         Research ─── Architecture ─── Decomposition ─── Routing
                             │
                             ▼
-                 CONTRACTS (.agentforge/contracts/)
+                  CONTRACTS (.monday/contracts/)
                             │  autoridad: alcance, permisos, criterios
           ┌─────────────────┼─────────────────┐
           ▼                 ▼                 ▼
@@ -23,7 +23,7 @@
                             ▼
                 QUALITY GATES (G1–G8 por level/risk)
                             ▼
-                REPORT (.agentforge/reports/)
+                REPORT (.monday/reports/)
                             ▼
               LEARNING LOOP (solo con señal)
 ```
@@ -48,7 +48,7 @@ El mismo flujo se comprime según el level. En L0 es "ejecutar → verificar →
                     ¿tier adecuado a mi configuración?
                         │ sí → ejecutar
                         │ no ↓
-Claude Code:   Agent(model, effort) ─── af-scout / af-worker / af-reviewer / general-purpose
+Claude Code:   Agent(model, effort) ─── monday-scout / monday-worker / monday-reviewer / general-purpose
 Antigravity:   invoke_subagent (mismo tier: contexto/paralelismo)
                agy -p --model --effort (otro tier Gemini)
                ask-claude.sh --model --effort (Claude como executor o segunda opinión)
@@ -67,12 +67,13 @@ Antigravity:   invoke_subagent (mismo tier: contexto/paralelismo)
 | `methodology/quality-gates.md` | Gates, selección, evidencia, revisión independiente |
 | `methodology/workflow.md` | Fases y procedimientos de Orchestrator y Executor |
 | `methodology/roles.md` | Responsabilidades por rol y reparto por defecto |
-| `methodology/knowledge.md` | Memoria del proyecto (`.agentforge/`) y learning loop |
+| `methodology/knowledge.md` | Memoria del proyecto (`.monday/`) y learning loop |
+| `capabilities/catalog.yaml` | Catálogo formal de capacidades del harness y pruebas de salud |
 | `contracts/templates/` | Formatos: task, report, agent, CONTEXT |
-| `contracts/examples/` | Contratos y reporte realistas (validados por `af.py`) |
+| `contracts/examples/` | Contratos y reporte realistas (validados por `monday.py`) |
 | `routing/profiles.yaml` | Único mapeo tier → modelo/esfuerzo por plataforma |
 | `adapters/*/README.md` | Solo diferencias de mecanismo por plataforma |
-| `adapters/claude-code/agents/` | Subagentes por función con herramientas restringidas |
-| `scripts/af.py` | Comprobaciones deterministas |
+| `adapters/claude-code/agents/` | Subagentes por función con herramientas restringidas (`monday-*`) |
+| `scripts/monday.py` | Comprobaciones deterministas, validación de contratos y scope |
 | `install.sh` | Enlaces simbólicos en ambas plataformas |
 | `docs/` | Por qué (decisions), cómo encaja (architecture), cómo se usa (usage) |

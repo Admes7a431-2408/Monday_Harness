@@ -1,0 +1,125 @@
+schema: 1
+contract: MON-0025-agentforge-to-monday-transmutation
+task: >
+  Transmutar integralmente AgentForge a Monday, consolidando identidad operativa,
+  arquitectura, CLI canónica scripts/monday.py, subagentes oficiales monday-*,
+  contratos y gobernanza, preservando el valor funcional y los cambios de trabajo preexistentes.
+status: DONE
+verified: true
+
+route:
+  - "Route: L4 · STANDARD · risk high · delegate + review(DEEP monday-reviewer)"
+
+delegations:
+  - "Agy (Antigravity IDE): orquestación, transmutación de código y pruebas -> accepted"
+  - "Claude Code (monday-reviewer): revisión independiente Gate G8/G9 -> accepted"
+
+what_changed: >
+  Transmutación integral de identidad y arquitectura a Monday:
+  1. CLI canónica scripts/monday.py implementando tier, role, validate, check-scope, cap y init.
+  2. scripts/af.py reducido a forwarder shim con advertencia de deprecación hacia scripts/monday.py.
+  3. Creación de subagentes oficiales monday-reviewer, monday-scout, monday-worker en adapters/claude-code/agents/ y eliminación de af-*.md.
+  4. Migración de metadatos y contratos a .monday/, con init --migrate-legacy seguro y sin dereferenciar symlinks.
+  5. Catálogo capabilities/catalog.yaml hardened contra inyección en CWD (sin shell=True, cwd=ROOT).
+  6. Suite determinista tests/test_monday.py con pruebas independientes de precedencia y migración.
+  7. install.sh con auditoría --check, desinstalación y purga segura verificada con readlink -f.
+  8. Preservación íntegra de Git, sin commits/push y conservando reporte histórico AF-0024.
+
+files_affected:
+  - CHANGELOG.md
+  - README.md
+  - SKILL.md
+  - VERSION
+  - install.sh
+  - routing/profiles.yaml
+  - scripts/monday.py
+  - scripts/af.py
+  - capabilities/catalog.yaml
+  - adapters/claude-code/README.md
+  - adapters/claude-code/agents/monday-reviewer.md
+  - adapters/claude-code/agents/monday-scout.md
+  - adapters/claude-code/agents/monday-worker.md
+  - adapters/antigravity/README.md
+  - contracts/templates/task.yaml
+  - contracts/templates/report.yaml
+  - contracts/templates/agent.yaml
+  - contracts/templates/CONTEXT.md
+  - contracts/examples/l2-bugfix.yaml
+  - contracts/examples/l4-parent.yaml
+  - contracts/examples/l4-stream-api.yaml
+  - contracts/examples/report-l2-bugfix.yaml
+  - docs/architecture.md
+  - docs/decisions.md
+  - docs/usage.md
+  - methodology/governance.md
+  - methodology/knowledge.md
+  - methodology/principles.md
+  - methodology/quality-gates.md
+  - methodology/roles.md
+  - methodology/workflow.md
+  - tests/test_monday.py
+  - .monday/CONTEXT.md
+  - .monday/contracts/MON-0025-agentforge-to-monday-transmutation.yaml
+  - .monday/reports/MON-0025-agentforge-to-monday-transmutation.yaml
+
+interface_changes:
+  - "agents: af-reviewer.md, af-scout.md, af-worker.md eliminados; sustituidos por monday-reviewer.md, monday-scout.md, monday-worker.md"
+  - "routing: profiles.yaml actualiza referencias de agentes hacia monday-*"
+  - "ssot: directorio canónico migrado de .agentforge/ a .monday/ (lectura fallback transitoria)"
+  - "cli: scripts/monday.py asume interfaz pública canónica; scripts/af.py redirige vía execv con aviso a stderr"
+  - "init: incorporación de flag --migrate-legacy para migración segura y no destructiva de .agentforge/ a .monday/"
+  - "skills: symlinks de instalación apuntan a ~/.claude/skills/monday y ~/.gemini/config/skills/monday"
+
+tests_executed:
+  - command: "python3 -m unittest discover -s tests -v"
+    result: "Ran 123 tests in 20.811s — OK"
+  - command: "./install.sh --check"
+    result: "Estado global: COMPLETO Y SALUDABLE (código 0)"
+  - command: "python3 scripts/monday.py cap status"
+    result: "5 capacidades base en estado Preparada con cwd=ROOT determinista (código 0)"
+  - command: "python3 scripts/monday.py validate --strict-schema contracts/examples/*.yaml"
+    result: "4 contratos de ejemplo validados correctamente (código 0)"
+  - command: "python3 scripts/monday.py validate .monday/contracts/*.yaml .monday/reports/*.yaml"
+    result: "Contratos canónicos y reportes históricos validados con aviso de deprecación (código 0)"
+
+verification_results:
+  - gate: G1
+    result: pass
+    evidence: "Suite unitaria tests/test_monday.py ejecuta 123 tests 100% verde sin dependencias externas."
+  - gate: G2
+    result: pass
+    evidence: "Model posture y tiers verificados en routing/profiles.yaml y monday.py tier."
+  - gate: G3
+    result: pass
+    evidence: "Límites y aislamiento de memoria local por proyecto en .monday/ comprobados."
+  - gate: G4
+    result: pass
+    evidence: "Validación estricta de esquema 1 y advertencias de deprecación verificadas."
+  - gate: G5
+    result: pass
+    evidence: "check-scope audita archivos fuera de alcance e ignorados no efímeros."
+  - gate: G6
+    result: pass
+    evidence: "install.sh verificado con --check, enlaces simbólicos limpios y desinstalación segura."
+  - gate: G7
+    result: pass
+    evidence: "Auditoría exhaustiva de residuos: 0 referencias injustificadas a AgentForge en código activo."
+  - gate: G8
+    result: pass
+    evidence: "Revisión independiente por Claude Code (monday-reviewer en Opus): veredicto formal definitivo APPROVE emitido en ambos ejes (Contrato: approve / Calidad: approve). 123 pruebas unitarias verificadas sin fallos."
+
+rulings:
+  - "Ruling: scripts/af.py se mantiene como forwarder shim temporal en v0.9.x con aviso de deprecación a stderr, con retiro programado en v1.0.0."
+  - "Ruling: .agentforge/ se mantiene únicamente como fallback de lectura para contratos y reportes antiguos; monday init nunca escribe en él."
+
+contract_deviations: []
+unexpected_findings: []
+remaining_risks:
+  - "La URL remota en GitHub conserva AgentForge hasta que el usuario decida renombrar el repositorio de forma remota."
+
+follow_up_recommendations:
+  - "Actualizar la configuración global de usuario en ~/.claude/CLAUDE.md para invocar monday-* en lugar de af-*."
+
+learnings:
+  - "El chequeo de capacidades debe ejecutar comandos en el contexto seguro de ROOT y sin shell=True para evitar inyección de comandos arbitrarios desde catálogos no confiables en CWD."
+  - "shutil.copytree debe usarse con symlinks=True y auditoría previa de destinos para evitar dereferenciar enlaces simbólicos que apunten fuera del repositorio."

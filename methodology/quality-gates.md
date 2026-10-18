@@ -10,9 +10,9 @@ Comprobaciones que deciden si un resultado se acepta. No todas aplican siempre: 
 | **G2 Functional** | ¿Funciona el flujo afectado, de punta a punta? | Ejecución real del flujo (CLI, request, UI, script) y lo observado. |
 | **G3 Tests** | ¿Hay un test que falla sin el cambio y pasa con él? ¿Pasa la suite relevante? | Salida de los tests; para bugs, fail → pass del mismo repro. |
 | **G4 Regression** | ¿Puede romper algo fuera de lo tocado? | Suite completa o la de los módulos que dependen de lo cambiado; búsqueda de usos de interfaces modificadas. |
-| **G5 Scope** | ¿El diff contiene solo lo autorizado? | Salida de `af.py check-scope <contrato>` (en repos git); si no hay git, la lista real de archivos modificados contra `scope`. "Solo toqué X" sin esa salida no es evidencia. Artefactos generados (cachés, builds) que aparezcan se declaran, no se ignoran. |
+| **G5 Scope** | ¿El diff contiene solo lo autorizado? | Salida de `monday.py check-scope <contrato>` (en repos git); si no hay git, la lista real de archivos modificados contra `scope`. "Solo toqué X" sin esa salida no es evidencia. Artefactos generados (cachés, builds) que aparezcan se declaran, no se ignoran. |
 | **G6 Contract** | ¿Se respetaron permisos, restricciones y human gates? ¿Están declaradas las desviaciones? | Rulings y deviations del reporte coherentes con el diff. |
-| **G7 Architecture** | ¿Respeta las decisiones y restricciones del proyecto (`.agentforge/` y ADRs)? | Referencia a la decisión/restricción comprobada. |
+| **G7 Architecture** | ¿Respeta las decisiones y restricciones del proyecto (`.monday/` y ADRs)? | Referencia a la decisión/restricción comprobada. |
 | **G8 Diff review** | ¿Lo aprobaría un revisor escéptico? | Revisión independiente (ver abajo). |
 
 ## Interface Integrity Gate
@@ -20,7 +20,7 @@ Comprobaciones que deciden si un resultado se acepta. No todas aplican siempre: 
 Parte de G1/G6/G8 en L2+ con risk ≥ medium (AD-011). Protege el *interface scope*, además del file scope de G5: una firma o data shape cambiado dentro de `allowed_files` no pasa inadvertido.
 
 - **Contrato:** `interfaces: none_modified` o un dict con `consumes`/`produces` no vacíos. Ausente o `{consumes: [], produces: []}` se rechaza.
-- **Reporte:** `interface_changes: none` o lista no vacía de cambios. Con `af.py validate --contract`, declarar cambios contra `none_modified` es incoherencia.
+- **Reporte:** `interface_changes: none` o lista no vacía de cambios. Con `monday.py validate --contract`, declarar cambios contra `none_modified` es incoherencia.
 - **Revisor (G8):** contrasta el diff con `interfaces`; toda alteración no autorizada es bloqueante (`changes_required`).
 
 ## Selección

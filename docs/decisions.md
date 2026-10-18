@@ -1,12 +1,12 @@
-# Decisiones de AgentForge
+# Decisiones de Monday
 
-Registro de por qué AgentForge es como es. Las propuestas de cambio a la metodología (desde el learning loop) se añaden aquí con su evidencia; una decisión se reemplaza con otra nueva, no se reescribe.
+Registro de por qué Monday es como es. Las propuestas de cambio a la metodología (desde el learning loop) se añaden aquí con su evidencia; una decisión se reemplaza con otra nueva, no se reescribe.
 
 ## Matriz de integración (estudio de referencias, 2026-10-07)
 
 Referencias: **SP** = obra/superpowers · **MP** = mattpocock/skills · **KP** = multica-ai/andrej-karpathy-skills · **NR** = nobodyohm-web/claude-code-model-router · **BG** = BearGare/claude-skills (model-routing, scope-control, verification-standards) · **CR** = shaaz1000/claude-router.
 
-| Mecanismo | Origen | Veredicto | Dónde vive en AgentForge |
+| Mecanismo | Origen | Veredicto | Dónde vive en Monday |
 |---|---|---|---|
 | Cuatro principios (pensar antes, simplicidad, quirúrgico, orientado al objetivo) | KP | **Conservar** | `principles.md` P1–P5 |
 | "Para tareas triviales, usa el juicio" | KP | **Conservar** como rigor proporcional | Levels + gates por nivel/riesgo |
@@ -17,7 +17,7 @@ Referencias: **SP** = obra/superpowers · **MP** = mattpocock/skills · **KP** =
 | Plan = decisiones que el implementador no puede tomar solo; interfaces consumes/produces; restricciones globales literales | SP | **Adaptar** | Campos del contrato (`context.interfaces`, `constraints`) |
 | Brief en archivo + contrato de retorno corto; punteros, no copias | SP, MP | **Conservar** | `routing.md §4`, handoff de `workflow.md` |
 | Estados DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED | SP | **Conservar** + `ESCALATE` de CR | `routing.md §4` |
-| "No confíes en el informe"; revisión en dos ejes (spec/contrato vs calidad) reportados por separado | SP, MP | **Conservar** | G8, `af-reviewer` |
+| "No confíes en el informe"; revisión en dos ejes (spec/contrato vs calidad) reportados por separado | SP, MP | **Conservar** | G8, `monday-reviewer` |
 | El controlador no corrige hallazgos él mismo; re-revisión limitada al diff de la corrección | SP | **Conservar** | G8 |
 | Bucle de corrección de 5 rondas, tabla de conflictos previa, ledger para todo, worktree para todo | SP | **Descartar** (peso) | Límite de 2 rondas + escalamiento; worktrees solo para ediciones paralelas |
 | Rulings `qué — por qué — coste si me equivoco` y 4 condiciones de parada | SP | **Conservar** | `governance.md` (rulings, human gates) |
@@ -33,7 +33,7 @@ Referencias: **SP** = obra/superpowers · **MP** = mattpocock/skills · **KP** =
 | Edición interactiva del glosario por el ejecutor | MP | **Conflicto → resuelto**: el executor propone en el reporte; escribe el orchestrator/humano | `knowledge.md` |
 | Grilling sin límite de preguntas | MP | **Descartar** | Una ronda, solo lo que bloquea, con recomendación (`governance.md`) |
 | Tickets como cortes verticales que caben en un contexto fresco; frontera de dependencias; expand-contract para cambios amplios | MP | **Conservar** | Orchestrator paso 4 |
-| Dependencia de issue tracker y etiquetas | MP | **Descartar** | Contratos en `.agentforge/contracts/` |
+| Dependencia de issue tracker y etiquetas | MP | **Descartar** | Contratos en `.monday/contracts/` |
 | Escalera de tiers + "config, no prosa" | NR | **Conservar** | `profiles.yaml` es el único lugar con modelos |
 | Esfuerzo como palanca independiente (±1) antes de cambiar de modelo | NR, BG | **Conservar** | `routing.md §1, §6` |
 | No reintentar el mismo tier; diagnosticar antes de que el superior rehaga; recordar el tier que funcionó | NR | **Conservar** | `routing.md §6` |
@@ -66,22 +66,30 @@ Referencias: **SP** = obra/superpowers · **MP** = mattpocock/skills · **KP** =
 
 **AD-004 — Una skill con divulgación progresiva, no varias skills.** Un solo disparador y un `SKILL.md` corto que enruta a los archivos de `methodology/` según la situación. Varias skills duplicarían reglas o se dispararían de forma inconsistente entre plataformas.
 
-**AD-005 — Instalación por enlace simbólico.** El mismo directorio es la skill en ambas plataformas (`~/.claude/skills/agentforge`, `~/.gemini/config/skills/agentforge`). No hay copias que puedan divergir.
+**AD-005 — Instalación por enlace simbólico.** El mismo directorio es la skill en ambas plataformas (`~/.claude/skills/monday`, `~/.gemini/config/skills/monday`). No hay copias que puedan divergir.
 
 **AD-006 — Sin hooks en v1.** Los hooks (clasificador, telemetría) añaden instalación, mantenimiento y modos de fallo por plataforma. La traza de routing vive en los reportes. Revisar si los reportes muestran que hace falta medir ahorro con datos.
 
-**AD-007 — Un script determinista (`af.py`) para lo que un modelo haría peor o más caro.** Validar estructura, comprobar alcance contra el diff y resolver tiers. Requiere Python 3 + PyYAML.
+**AD-007 — Un script determinista (`monday.py`) para lo que un modelo haría peor o más caro.** Validar estructura, comprobar alcance contra el diff, auditar estado de capacidades y resolver tiers. Requiere Python 3 + PyYAML.
 
 **AD-008 — Metodología en español, campos y estados en inglés.** El usuario trabaja en español; los nombres de campos, estados y tiers en inglés son estables y comunes a ambas plataformas.
 
 **AD-009 — Endurecimientos tras la validación con agentes reales (2026-10-07).** Evidencia y cambio:
 - *Executor Claude (sonnet/medium, headless) sobre un contrato L2:* corrigió el bug con un diff mínimo y un test que falla antes y pasa después (verificado de forma independiente), pero declaró G5 `pass` de memoria cuando el árbol tenía archivos generados modificados. → G5 exige la salida de `check-scope`; cada `pass` cita un comando ejecutado.
-- *Orchestrator Antigravity (gemini-3.1-pro-high, headless, solo lectura):* buena clasificación, preguntas con recomendación y comando de lanzamiento correcto; pero el contrato tenía alcance `src/**/*`, comandos de verificación inventados o vacíos, `interfaces` vacío pese a un cambio de forma de datos y un id repetido. → `af.py validate` exige `verification.commands` desde L2 y avisa de alcances amplios e ids duplicados; el paso *Contratar* exige comprobar el contrato contra el repo.
+- *Orchestrator Antigravity (gemini-3.1-pro-high, headless, solo lectura):* buena clasificación, preguntas con recomendación y comando de lanzamiento correcto; pero el contrato tenía alcance `src/**/*`, comandos de verificación inventados o vacíos, `interfaces` vacío pese a un cambio de forma de datos y un id repetido. → `monday.py validate` exige `verification.commands` desde L2 y avisa de alcances amplios e ids duplicados; el paso *Contratar* exige comprobar el contrato contra el repo.
 - *Antigravity headless:* un comando denegado terminó el turno sin respuesta y con `status: SUCCESS`. → Nota en el adapter: comprobar `denied_actions` y pedir solo herramientas de lectura en encargos de solo lectura.
 - *Clasificación (Claude sonnet/low, 6 tareas):* L0 siguió siendo L0; la búsqueda amplia se delegó a FAST; secretos y producción se detuvieron en un human gate; un fallo previo escaló a MAX con diagnóstico. Sin cambios.
-- *Revisión independiente (opus/high):* 12 defectos de coherencia, todos corregidos: delegación hacia arriba y conteo de profundidad (§7), umbral único de G8 en la matriz, L2 definido sin riesgo, vocabulario de estados único, `check-scope` robusto (renombrados, globs por segmento, rutas no ASCII, contrato leído desde `--base`, `.agentforge/` no exento salvo el reporte propio), instalador.
+- *Revisión independiente (opus/high):* 12 defectos de coherencia, todos corregidos: delegación hacia arriba y conteo de profundidad (§7), umbral único de G8 en la matriz, L2 definido sin riesgo, vocabulario de estados único, `check-scope` robusto (renombrados, globs por segmento, rutas no ASCII, contrato leído desde `--base`, `.monday/` no exento salvo el reporte propio), instalador.
 
-**AD-010 — Correcciones de auditoría del tooling (AF-0020).** `af.py validate`: `DONE` exige `verified: true` y ninguna gate `not_run`/`fail`; clasifica `agent.yaml` como `agent` con validación propia; `--contract <ruta>` exige que los reportes incluyan todas las gates del contrato. `check-scope` falla si el contrato no está en git a `--base` (salvo `--allow-untracked-contract`). `af.py` calcula `ROOT` con `realpath` (robusto ante symlinks). `install.sh --agents` enlaza (`ln -s`) en vez de copiar, coherente con AD-005. `workflow.md` exige commitear el contrato antes de delegar; `governance.md` aclara que `permissions.commands` es un soft gate conductual en v1.
+**AD-010 — Correcciones de auditoría del tooling (AF-0020).** `monday.py validate`: `DONE` exige `verified: true` y ninguna gate `not_run`/`fail`; clasifica `agent.yaml` como `agent` con validación propia; `--contract <ruta>` exige que los reportes incluyan todas las gates del contrato. `check-scope` falla si el contrato no está en git a `--base` (salvo `--allow-untracked-contract`). `monday.py` calcula `ROOT` con `realpath` (robusto ante symlinks). `install.sh --agents` enlaza (`ln -s`) en vez de copiar, coherente con AD-005. `workflow.md` exige commitear el contrato antes de delegar; `governance.md` aclara que `permissions.commands` es un soft gate conductual en v1.
 Los frontmatters de `adapters/claude-code/agents/*.md` (`model: sonnet|opus|haiku`) son solo un fallback de sintaxis de la plataforma: la fuente de verdad del modelo son los tiers de `routing/profiles.yaml`.
 
-**AD-011 — Interface Integrity Gate híbrido (AF-0021).** AgentForge protegía el file scope (G5) pero no el interface scope: un cambio de firma o de data shape dentro de `allowed_files` pasaba inadvertido. Solución en tres capas, sin parser AST universal: (1) *contrato* — en L2+ con risk ≥ medium, `interfaces: none_modified` o `consumes`/`produces` no vacíos; (2) *reporte* — `interface_changes: none | [cambios]`; (3) *tooling y revisión* — `af.py validate` rechaza contratos sin declaración (o con `{consumes: [], produces: []}`), exige `interface_changes` y, con `--contract`, detecta cambios declarados contra `none_modified`; `af-reviewer` contrasta el diff con `interfaces` y trata toda alteración no autorizada como bloqueante (`changes_required`, P7). Coste: una línea más en contratos L2+; L0/L1 y risk low no cambian. Limitación: la coherencia contrato↔diff real depende del revisor, no del script.
+**AD-011 — Interface Integrity Gate híbrido (AF-0021).** El sistema protegía el file scope (G5) pero no el interface scope: un cambio de firma o de data shape dentro de `allowed_files` pasaba inadvertido. Solución en tres capas, sin parser AST universal: (1) *contrato* — en L2+ con risk ≥ medium, `interfaces: none_modified` o `consumes`/`produces` no vacíos; (2) *reporte* — `interface_changes: none | [cambios]`; (3) *tooling y revisión* — `monday.py validate` rechaza contratos sin declaración (o con `{consumes: [], produces: []}`), exige `interface_changes` y, con `--contract`, detecta cambios declarados contra `none_modified`; `monday-reviewer` contrasta el diff con `interfaces` y trata toda alteración no autorizada como bloqueante (`changes_required`, P7). Coste: una línea más en contratos L2+; L0/L1 y risk low no cambian. Limitación: la coherencia contrato↔diff real depende del revisor, no del script.
+
+**AD-012 — Transmutación a Monday Harness (2026-10-18, accepted).**
+Consolidación integral de la identidad, contratos, tooling y arquitectura bajo Monday v0.9+.
+1. *Identidad única:* Monday es el nombre operativo del harness; se retiran duplicidades y agentes heredados obsoletos.
+2. *Estructura SSOT:* migración canónica a `.monday/` (con compatibilidad de lectura para `.agentforge/` en repositorios no migrados). Monday jamás escribe en `.agentforge/`; `monday init` inicializa `.monday/` y ofrece `--migrate-legacy` para migración no destructiva.
+3. *Tooling:* `scripts/monday.py` como CLI único, agregando subcomandos `cap status` (ciclo de vida de 4 estados: Disponible, Autorizada, Preparada, Activa) y auditoría reforzada de alcance.
+4. *Subagentes:* `monday-scout` (FAST), `monday-worker` (STANDARD), `monday-reviewer` (DEEP/G8).
+5. *Instalación limpia:* `install.sh` audita y purga residuos heredados (`--purge-legacy` / `--uninstall`).

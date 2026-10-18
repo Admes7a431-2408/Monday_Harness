@@ -1,6 +1,7 @@
 # Ejemplo L4: el orquestador descompone una feature en streams paralelos con alcances disjuntos.
 # Este contrato padre no se ejecuta: coordina. Cada stream tiene su propio contrato (ver l4-stream-api.yaml).
-id: AF-0010-csv-export
+schema: 1
+id: MON-0010-csv-export
 level: L4
 risk: high                            # expone datos de clientes
 
@@ -9,7 +10,7 @@ objective: >
   desde la pantalla de informes; ningún otro rol puede hacerlo.
 
 context:
-  read_first: [.agentforge/CONTEXT.md, .agentforge/decisions.md, docs/specs/csv-export.md]
+  read_first: [.monday/CONTEXT.md, .monday/decisions.md, docs/specs/csv-export.md]
   background: >
     Decisión AD-004: los informes se generan en streaming; nunca se cargan todas las filas en memoria.
   interfaces:
@@ -43,8 +44,8 @@ routing:
   reviewer_tier: DEEP
   escalation_policy: return
 
-# Descomposición (cada línea = un contrato hijo con parent: AF-0010-csv-export):
-#   AF-0011-csv-api   STANDARD  src/api/reports/, tests/api/reports/   deps: —
-#   AF-0012-csv-ui    STANDARD  src/web/reports/, tests/web/reports/   deps: — (usa la interfaz pactada, no la implementación)
-#   AF-0013-csv-e2e   STANDARD  tests/e2e/csv_export.py                deps: AF-0011, AF-0012
-# Frontera inicial: AF-0011 y AF-0012 en paralelo (alcances disjuntos, un worktree cada uno). Revisión DEEP del conjunto antes del human gate.
+# Descomposición (cada línea = un contrato hijo con parent: MON-0010-csv-export):
+#   MON-0011-csv-api   STANDARD  src/api/reports/, tests/api/reports/   deps: —
+#   MON-0012-csv-ui    STANDARD  src/web/reports/, tests/web/reports/   deps: — (usa la interfaz pactada, no la implementación)
+#   MON-0013-csv-e2e   STANDARD  tests/e2e/csv_export.py                deps: MON-0011, MON-0012
+# Frontera inicial: MON-0011 y MON-0012 en paralelo (alcances disjuntos, un worktree cada uno). Revisión DEEP del conjunto antes del human gate.

@@ -1,10 +1,10 @@
-# AgentForge
+# Monday
 
 Metodología y tooling para que agentes de IA produzcan software correcto y verificable: cada trabajo recibe el proceso, la autoridad y la capacidad cognitiva justos.
 
 ## El problema
 
-Los agentes delegan sin límites claros, amplían el alcance, declaran éxito sin evidencia y esconden errores tras otros agentes. AgentForge impone contratos explícitos, verificación determinista y reportes honestos.
+Los agentes delegan sin límites claros, amplían el alcance, declaran éxito sin evidencia y esconden errores tras otros agentes. Monday impone contratos explícitos, verificación determinista y reportes honestos.
 
 ## Arquitectura y Coordinación
 
@@ -13,22 +13,23 @@ Human (Product / Intent)
   ↓
 Orchestrator (Antigravity / Architect / Quality Owner)
   ↓
-Contracts (.agentforge/contracts/<id>.yaml)
+Contracts (.monday/contracts/<id>.yaml)
   ↓
 Workers (Claude Code / Implementation)
   ↓
-Verification (Deterministic Tools: scripts/af.py + tests)
+Verification (Deterministic Tools: scripts/monday.py + tests)
   ↓
-Review (Independent Reviewer: af-reviewer)
+Review (Independent Reviewer: monday-reviewer)
   ↓
 Human Acceptance
 ```
 
 - `SKILL.md` — punto de entrada de la skill.
 - `methodology/` — principios, routing, roles, gobernanza, quality gates, conocimiento.
+- `capabilities/catalog.yaml` — catálogo de capacidades y pruebas de salud ambiental.
 - `contracts/` — plantillas (`templates/`) y ejemplos (`examples/`) de contratos y reportes.
 - `routing/profiles.yaml` — mapeo tier → modelo/esfuerzo por plataforma.
-- `scripts/af.py` — comprobaciones deterministas (`tier`, `role`, `validate`, `check-scope`, `init`).
+- `scripts/monday.py` — comprobaciones deterministas (`tier`, `role`, `validate`, `check-scope`, `cap status`, `init`).
 - `adapters/` — diferencias de plataforma (Claude Code, Antigravity).
 - `install.sh` — instalación reversible por symlinks (una sola fuente de verdad).
 
@@ -54,31 +55,42 @@ Detalle completo en `methodology/routing.md` y `methodology/quality-gates.md`.
 ## Flujo de Trabajo
 
 1. **Clasificar**: nivel (L0–L5), tier cognitivo, riesgo y decisión de ejecutar o delegar.
-2. **Contratar**: escribir el contrato (`.agentforge/contracts/<id>.yaml`) y validar con `af.py validate`.
+2. **Contratar**: escribir el contrato (`.monday/contracts/<id>.yaml`) y validar con `monday.py validate`.
 3. **Ejecutar**: el ejecutor opera dentro del alcance (`allowed_files`), sin tocar `excluded_areas`.
-4. **Verificar**: comprobar gates (G1…G8), incluyendo `af.py check-scope` (G5) e Interface Integrity (P7).
-5. **Revisar**: revisión independiente de calidad y contrato (`af-reviewer`).
-6. **Reportar**: generar `.agentforge/reports/<id>.yaml` con evidencia verificable (status: DONE, DONE_WITH_CONCERNS, NEEDS_CONTEXT, BLOCKED, ESCALATE, FAILED).
+4. **Verificar**: comprobar gates (G1…G8), incluyendo `monday.py check-scope` (G5) e Interface Integrity (P7).
+5. **Revisar**: revisión independiente de calidad y contrato (`monday-reviewer`).
+6. **Reportar**: generar `.monday/reports/<id>.yaml` con evidencia verificable (status: DONE, DONE_WITH_CONCERNS, NEEDS_CONTEXT, BLOCKED, ESCALATE, FAILED).
 
 ## Instalación
 
 ```bash
-git clone [https://github.com/Admes7a431-2408/AgentForge.git](https://github.com/Admes7a431-2408/AgentForge.git) && cd AgentForge
+git clone https://github.com/Admes7a431-2408/AgentForge.git && cd AgentForge
 bash install.sh --dry-run          # ver qué haría
 bash install.sh                    # enlaza la skill en ~/.claude y ~/.gemini
-bash install.sh --claude --agents  # solo Claude Code + subagentes af-*
+bash install.sh --claude --agents  # solo Claude Code + subagentes monday-*
+bash install.sh --check            # audita enlaces, agentes monday-* y residuos legacy (solo lectura)
 bash install.sh --help
 ```
 
 Nunca sobrescribe: si el destino existe y no es un enlace a este repositorio, lo omite.
 
+### Purga de agentes obsoletos
+
+```bash
+bash install.sh --purge-legacy --dry-run
+bash install.sh --purge-legacy
+```
+
+Retira de forma segura las definiciones obsoletas de `~/.claude/agents/` respaldando los archivos regulares y desvinculando enlaces heredados.
+
 ## Quickstart
 
 ```bash
-python3 scripts/af.py init /ruta/a/mi/proyecto      # crea .agentforge/{CONTEXT.md,contracts,reports}
-python3 scripts/af.py tier DEEP --platform claude-code
-python3 scripts/af.py validate .agentforge/contracts/mi-tarea.yaml
-python3 scripts/af.py check-scope .agentforge/contracts/mi-tarea.yaml
+python3 scripts/monday.py init /ruta/a/mi/proyecto      # crea .monday/{CONTEXT.md,contracts,reports}
+python3 scripts/monday.py cap status
+python3 scripts/monday.py tier DEEP --platform claude-code
+python3 scripts/monday.py validate .monday/contracts/mi-tarea.yaml
+python3 scripts/monday.py check-scope .monday/contracts/mi-tarea.yaml
 ```
 
 ## Reversibilidad
@@ -111,7 +123,7 @@ python3 -m unittest discover -s tests -v
 
 ## Acknowledgements & Technical References
 
-AgentForge fue diseñado e implementado de forma independiente, inspirándose en patrones conceptuales y arquitecturas de proyectos pioneros del ecosistema open-source:
+Monday fue diseñado e implementado de forma independiente (evolucionado a partir de la base de AgentForge), inspirándose en patrones conceptuales y arquitecturas de proyectos pioneros del ecosistema open-source:
 
 ### Metodología y Calidad de Ingeniería
 - [obra/superpowers](https://github.com/obra/superpowers) (por Jesse Vincent — MIT): inspiración en el estándar de evidencia fresca antes de declarar éxito, revisión independiente en dos ejes (contrato vs calidad) y gobierno de tareas.
@@ -123,7 +135,7 @@ AgentForge fue diseñado e implementado de forma independiente, inspirándose en
 - [BearGare/claude-skills](https://github.com/BearGare/claude-skills) (por BearGare): estudio conceptual de límites de profundidad de delegación, contención de desvío de alcance y reporte honesto de estados no verificados.
 - [shaaz1000/claude-router](https://github.com/shaaz1000/claude-router) (por shaaz1000 — MIT): inspiración en la distinción entre complejidad real de la tarea y volumen de texto pegado, y vías de escalamiento explícito (`ESCALATE`).
 
-*Nota: Todo el código fuente, scripts, plantillas de contratos y documentación de AgentForge fueron redactados e implementados originalmente. La mención de estos proyectos constituye reconocimiento técnico e intelectual, y no implica patrocinio, respaldo, afiliación ni autoría compartida.*
+*Nota: Todo el código fuente, scripts, plantillas de contratos y documentación de Monday fueron redactados e implementados originalmente. La mención de estos proyectos constituye reconocimiento técnico e intelectual, y no implica patrocinio, respaldo, afiliación ni autoría compartida.*
 
 ## Licencia
 

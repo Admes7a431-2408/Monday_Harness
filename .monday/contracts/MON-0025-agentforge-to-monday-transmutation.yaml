@@ -1,0 +1,134 @@
+schema: 1
+id: MON-0025-agentforge-to-monday-transmutation
+parent: null
+level: L4
+risk: high
+
+objective: >
+  Transmutar integralmente AgentForge a Monday, consolidando identidad operativa,
+  arquitectura, CLI canónica scripts/monday.py, subagentes oficiales monday-*,
+  contratos y gobernanza, preservando el valor funcional y los cambios de trabajo preexistentes.
+
+context:
+  read_first:
+    - .monday/CONTEXT.md
+    - docs/architecture.md
+    - docs/decisions.md
+  background: >
+    Evolución arquitectónica y de identidad de AgentForge a Monday Harness.
+  interfaces:
+    consumes:
+      - "cli: python3 scripts/af.py -> forwards to scripts/monday.py"
+    produces:
+      - "cli: python3 scripts/monday.py {tier,role,validate,check-scope,cap,init}"
+      - "agents: monday-reviewer, monday-scout, monday-worker"
+      - "ssot: .monday/{CONTEXT.md,contracts/,reports/}"
+      - "skills: ~/.claude/skills/monday, ~/.gemini/config/skills/monday"
+      - "init_flag: monday init --migrate-legacy"
+
+role: orchestrator
+
+scope:
+  allowed_files:
+    - "CHANGELOG.md"
+    - "README.md"
+    - "SKILL.md"
+    - "VERSION"
+    - "install.sh"
+    - "routing/profiles.yaml"
+    - "scripts/monday.py"
+    - "scripts/af.py"
+    - "capabilities/catalog.yaml"
+    - "adapters/claude-code/README.md"
+    - "adapters/claude-code/agents/monday-reviewer.md"
+    - "adapters/claude-code/agents/monday-scout.md"
+    - "adapters/claude-code/agents/monday-worker.md"
+    - "adapters/antigravity/README.md"
+    - "contracts/templates/task.yaml"
+    - "contracts/templates/report.yaml"
+    - "contracts/templates/agent.yaml"
+    - "contracts/templates/CONTEXT.md"
+    - "contracts/examples/l2-bugfix.yaml"
+    - "contracts/examples/l4-parent.yaml"
+    - "contracts/examples/l4-stream-api.yaml"
+    - "contracts/examples/report-l2-bugfix.yaml"
+    - "docs/architecture.md"
+    - "docs/decisions.md"
+    - "docs/usage.md"
+    - "methodology/governance.md"
+    - "methodology/knowledge.md"
+    - "methodology/principles.md"
+    - "methodology/quality-gates.md"
+    - "methodology/roles.md"
+    - "methodology/workflow.md"
+    - "tests/test_monday.py"
+    - ".monday/CONTEXT.md"
+  allowed_directories:
+    - "capabilities"
+    - "adapters/claude-code/agents"
+    - "tests"
+    - ".monday"
+    - ".agentforge"
+  excluded_areas:
+    - ".git"
+    - ".env"
+
+permissions:
+  commands:
+    allow:
+      - "python3 -m unittest discover -s tests -v"
+      - "./install.sh --check"
+      - "python3 scripts/monday.py cap status"
+      - "python3 scripts/monday.py validate --strict-schema contracts/examples/*.yaml"
+      - "python3 scripts/monday.py validate .monday/contracts/*.yaml .monday/reports/*.yaml"
+    ask: []
+    deny:
+      - "git push"
+      - "git commit"
+      - "git reset --hard"
+      - "git clean"
+  network: false
+  write_memory: true
+
+constraints:
+  - "Preservar intacto el historial de Git y los cambios previos no confirmados (incluido AF-0024)."
+  - "No realizar commits ni push sin autorización explícita."
+  - "Eliminar identidad activa de AgentForge manteniendo excepciones históricas justificadas."
+
+dependencies: []
+
+acceptance_criteria:
+  - "scripts/monday.py es la CLI canónica de Monday con capacidades, scope y validación."
+  - "scripts/af.py funciona como forwarder shim transparente con deprecation warning a stderr."
+  - "Subagentes oficiales monday-reviewer, monday-scout, monday-worker instalados y probados."
+  - "install.sh instala y audita Monday, detectando y limpiando residuos antiguos de forma segura."
+  - "Suite de pruebas en tests/test_monday.py verifica Monday y pasa al 100%."
+  - "Revisión independiente por Claude Code."
+
+verification:
+  commands:
+    - "python3 -m unittest discover -s tests -v"
+    - "./install.sh --check"
+    - "python3 scripts/monday.py cap status"
+  gates: [G1, G2, G3, G4, G5, G6, G7, G8]
+  seams:
+    - "scripts/monday.py"
+    - "install.sh"
+    - "capabilities/catalog.yaml"
+
+human_gates:
+  - "Aprobación final del usuario previa a commits o publicación remota."
+
+deliverables:
+  - code changes
+  - report: .monday/reports/MON-0025-agentforge-to-monday-transmutation.yaml
+
+routing:
+  mode: delegate
+  preferred_tier: STANDARD
+  reviewer_tier: DEEP
+  allow_delegation: down
+  escalation_policy: return
+
+escalation_rules:
+  - "Parar y consultar ante cualquier cambio irreversible, pérdida de datos o cambio en remoto."

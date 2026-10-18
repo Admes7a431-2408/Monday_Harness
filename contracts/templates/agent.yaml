@@ -1,7 +1,8 @@
-# AgentForge — Agent Contract
+# Monday — Agent Contract
 # Declara un rol especializado reutilizable (methodology/roles.md). No fija un modelo: fija un tier por defecto.
 # Los adapters lo traducen a la plataforma (p. ej. adapters/claude-code/agents/*.md).
 
+schema: 1                            # versión de especificación del agente (1 = Monday v0.9+)
 name: security-reviewer
 role: reviewer                    # executor | specialist | reviewer
 purpose: >                        # cuándo usarlo (frase de disparo, no flujo)

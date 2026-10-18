@@ -1,0 +1,44 @@
+# Monday — Capabilities Catalog
+# Declaración de capacidades disponibles con sus requisitos deterministas.
+version: 1
+
+capabilities:
+  git:
+    description: Control de versiones e inspección de scope y diffs
+    check_cmd: git --version
+    tier: FAST
+    risk: low
+    tools: [run_command]
+    category: core
+
+  python-ast:
+    description: Análisis estático de signaturas e interfaces mediante AST nativo
+    check_cmd: python3 -c "import ast"
+    tier: FAST
+    risk: low
+    tools: [python3]
+    category: analysis
+
+  monday-reviewer:
+    description: Revisor escéptico independiente de solo lectura (G8)
+    check_cmd: test -f adapters/claude-code/agents/monday-reviewer.md
+    tier: DEEP
+    risk: low
+    tools: [read, grep, glob]
+    category: review
+
+  test-runner:
+    description: Ejecutor determinista de suites de pruebas unitarias
+    check_cmd: python3 -m unittest --help
+    tier: FAST
+    risk: low
+    tools: [run_command]
+    category: testing
+
+  claude-bridge:
+    description: Subproceso headless puente con Claude Code CLI
+    check_cmd: test -x ~/.gemini/config/skills/claude/scripts/ask-claude.sh
+    tier: STANDARD
+    risk: medium
+    tools: [ask-claude.sh]
+    category: bridge

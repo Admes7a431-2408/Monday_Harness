@@ -1,4 +1,5 @@
-contract: AF-0007-discount-rounding
+schema: 1
+contract: MON-0007-discount-rounding
 task: >
   Corregir diferencias de 0,01 € en facturas con descuento porcentual.
 status: DONE_WITH_CONCERNS
@@ -7,8 +8,8 @@ verified: true
 route:
   - "Route: L2 · STANDARD · risk medium · delegate + review(DEEP) — bug de cálculo con tests existentes"
 delegations:
-  - "af-scout FAST: localizar todos los usos de round_money → accepted (5 citas, 2 comprobadas)"
-  - "af-reviewer DEEP: revisión del diff → contrato approve, calidad approve con 1 minor"
+  - "monday-scout FAST: localizar todos los usos de round_money → accepted (5 citas, 2 comprobadas)"
+  - "monday-reviewer DEEP: revisión del diff → contrato approve, calidad approve con 1 minor"
 
 what_changed: >
   compute_total() redondeaba cada línea y después el total. Ahora acumula sin redondear
@@ -36,10 +37,10 @@ verification_results:
     evidence: "suite tests/billing 48/48; round_money tiene 5 usos, solo totals.py afectado"
   - gate: G5
     result: pass
-    evidence: "af.py check-scope: 2 changed, 0 out of scope"
+    evidence: "monday.py check-scope: 2 changed, 0 out of scope"
   - gate: G8
     result: pass
-    evidence: "af-reviewer: approve/approve; minor: nombre de variable 'acc' poco descriptivo (aplicado)"
+    evidence: "monday-reviewer: approve/approve; minor: nombre de variable 'acc' poco descriptivo (aplicado)"
 
 rulings:
   - "Ruling: mantener round_money existente en vez de usar quantize directo — ya es la convención del módulo — bajo"
