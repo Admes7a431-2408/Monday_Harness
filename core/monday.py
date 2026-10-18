@@ -623,7 +623,8 @@ def hook_pre(platform, payload, root):
     if platform == "claude":
         return {"hookSpecificOutput": {"hookEventName": "PreToolUse",
                                        "permissionDecision": "ask", "permissionDecisionReason": reason}}
-    return {"decision": "force_ask", "reason": reason}     # 'ask' se autoaprueba en accept-edits
+    # En agy, 'ask' y 'force_ask' se autoaprueban en modo accept-edits (verificado): solo 'deny' bloquea.
+    return {"decision": "deny", "reason": reason + ". Pide al humano que lo autorice (ampliando el scope de la feature o ejecutándolo él)."}
 
 
 def hook_stop(platform, payload, root):
@@ -669,6 +670,12 @@ def cmd_hook(a):
     except Exception as e:                                 # un hook roto no debe bloquear al agente
         print(f"monday hook {a.event}: {e}", file=sys.stderr)
         return 0
+    if isinstance(result, dict):                          # traza de lo que Monday bloqueó o pidió confirmar
+        log = root / ".monday" / "runtime" / "hooks.log"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        with log.open("a") as fh:
+            fh.write(json.dumps({"at": now(), "platform": a.platform, "event": a.event, "result": result},
+                                ensure_ascii=False) + "\n")
     if isinstance(result, str):
         print(result)
     elif result is not None:

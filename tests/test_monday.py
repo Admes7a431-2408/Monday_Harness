@@ -291,7 +291,7 @@ class S8OutOfScope(Base):
         r = p.m("hook", "pre", "--platform", "antigravity",
                 inp=json.dumps({"workspacePaths": [str(p.dir)],
                                 "toolCall": {"name": "write_to_file", "args": {"TargetFile": out_path}}}))
-        self.assertEqual(json.loads(r.stdout)["decision"], "force_ask")
+        self.assertEqual(json.loads(r.stdout)["decision"], "deny", "en agy solo 'deny' bloquea en accept-edits")
         in_path = str(p.dir / "src" / "calc.py")
         r = p.m("hook", "pre", "--platform", "antigravity",
                 inp=json.dumps({"workspacePaths": [str(p.dir)],
@@ -468,6 +468,10 @@ class DesignIntegrity(unittest.TestCase):
     def test_agents_md_template_under_200_lines(self):
         self.assertLess(len((REPO / "core/templates/AGENTS.md").read_text().splitlines()), 200)
         self.assertLess(len((REPO / "AGENTS.md").read_text().splitlines()), 200)
+
+    def test_repo_agents_md_block_matches_template(self):
+        block = lambda t: t[t.index("<!-- monday:begin"):t.index("<!-- monday:end -->")]
+        self.assertEqual(block((REPO / "AGENTS.md").read_text()), block((REPO / "core/templates/AGENTS.md").read_text()))
 
     def test_adapters_point_to_core_roles_instead_of_copying(self):
         for agent in (REPO / "adapters").glob("*/agents/*.md"):
