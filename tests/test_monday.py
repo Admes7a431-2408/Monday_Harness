@@ -462,6 +462,79 @@ class Distribution(Base):
         self.assertIn("adaptador antigravity", r.stdout)
 
 
+# ---------------------------------------------------------------- regresiones de la revisión independiente de M-001
+
+class ReviewRegressions(Base):
+    def test_contract_tampering_is_rejected_until_amended(self):
+        p = self.project()
+        p.add_feature(risk="high")
+        p.m("start", "F-001")
+        data = p.features()
+        f = data["features"][0]
+        f["risk"], f["scope"] = "low", ["**"]
+        f["acceptance_criteria"][0]["verify"] = "true"
+        p.write("features.json", json.dumps(data, indent=2))
+        p.write("README.md", "editado\n")
+        r = p.m("done", "F-001")
+        self.assertEqual(r.returncode, 1, "rebajar el contrato a mano no debe permitir el cierre")
+        self.assertIn("[FAIL] contract", r.stdout)
+        self.assertEqual(p.m("amend", "F-001", "--reason", "el humano rebajó el riesgo").returncode, 0)
+        hist = p.read("progress/history.md")
+        self.assertIn("CONTRATO MODIFICADO", hist)
+        self.assertIn("el humano rebajó el riesgo", hist)
+
+    def test_amend_invalidates_previous_review(self):
+        p = self.project()
+        p.add_feature(risk="high")
+        p.m("start", "F-001")
+        p.fix_bug()
+        p.m("review", "F-001", "--verdict", "approve", "--by", "monday-reviewer")
+        data = p.features()
+        data["features"][0]["scope"].append("docs/**")
+        p.write("features.json", json.dumps(data, indent=2))
+        self.assertIn("revisión invalidada", p.m("amend", "F-001", "--reason", "docs").stdout)
+        self.assertEqual(p.m("done", "F-001").returncode, 1)
+
+    def test_rollback_keeps_merged_files_edited_after_install(self):
+        d = Path(tempfile.mkdtemp(prefix="monday-test-"))
+        self.addCleanup(shutil.rmtree, d, True)
+        (d / "AGENTS.md").write_text("# Equipo\n")
+        run([sys.executable, str(SRC_CLI), "install", "."], d)
+        (d / "AGENTS.md").write_text((d / "AGENTS.md").read_text() + "Nota añadida por el equipo.\n")
+        r = run([sys.executable, str(d / ".monday" / "monday.py"), "rollback", "."], d)
+        self.assertIn("conservar AGENTS.md", r.stdout)
+        self.assertIn("Nota añadida por el equipo.", (d / "AGENTS.md").read_text())
+        self.assertTrue(any((d / ".monday" / "backups").iterdir()), "el backup se conserva para --force")
+        run([sys.executable, str(SRC_CLI), "rollback", ".", "--force"], d)
+        self.assertEqual((d / "AGENTS.md").read_text(), "# Equipo\n")
+
+    def test_rollback_all_removes_runtime_state(self):
+        p = self.project()
+        p.write("src/x.py", "x = 1\n")
+        p.write("init.sh", "#!/usr/bin/env bash\nexit 1\n")
+        p.m("hook", "stop", "--platform", "claude", inp=json.dumps({"cwd": str(p.dir)}))
+        self.assertTrue((p.dir / ".monday" / "runtime").exists())
+        p.sh("git", "checkout", "init.sh")
+        p.m("rollback", ".", "--all", "--force")
+        self.assertFalse((p.dir / ".monday").exists())
+
+    def test_stop_signature_ignores_variable_output(self):
+        p = self.project()
+        p.write("init.sh", '#!/usr/bin/env bash\necho "FAIL: pytest (exit 1)"\necho "Ran 3 tests in $RANDOM.$RANDOM s"\nexit 1\n')
+        p.write("src/x.py", "x = 1\n")
+        payload = json.dumps({"workspacePaths": [str(p.dir)]})
+        self.assertEqual(json.loads(p.m("hook", "stop", "--platform", "antigravity", inp=payload).stdout)["decision"], "continue")
+        self.assertEqual(p.m("hook", "stop", "--platform", "antigravity", inp=payload).stdout.strip(), "")
+
+    def test_stop_skips_when_only_memory_changed(self):
+        p = self.project()
+        p.write("init.sh", "#!/usr/bin/env bash\nexit 1\n")
+        p.commit("init roto a propósito")
+        p.write("progress/current.md", "nota\n")
+        r = p.m("hook", "stop", "--platform", "claude", inp=json.dumps({"cwd": str(p.dir)}))
+        self.assertEqual(r.stdout.strip(), "")
+
+
 # ---------------------------------------------------------------- integridad del diseño
 
 class DesignIntegrity(unittest.TestCase):

@@ -23,7 +23,8 @@ RISKS = ("low", "medium", "high")
 FEATURE_KEYS = {"id", "title", "description", "status", "risk", "scope", "acceptance_criteria",
                 "review_required", "depends_on", "notes",
                 # escritos por el CLI
-                "base", "preexisting", "started_at", "done_at", "blocked_reason", "review"}
+                "base", "preexisting", "started_at", "done_at", "blocked_reason", "review", "contract"}
+CONTRACT_KEYS = ("risk", "scope", "acceptance_criteria", "review_required", "depends_on")
 CRITERION_KEYS = {"id", "text", "verify"}
 BLOCK_BEGIN, BLOCK_END = "<!-- monday:begin", "<!-- monday:end -->"
 REQUIRED_FILES = ("AGENTS.md", "init.sh", "features.json", "docs/architecture.md",
@@ -144,6 +145,11 @@ def validate_features(data):
 
 def active_feature(data):
     return next((f for f in data.get("features", []) if f.get("status") == "in_progress"), None)
+
+
+def contract_hash(f):
+    """Huella de lo que autoriza y exige la feature; cambiarla tras `start` requiere `amend`."""
+    return sha256(json.dumps({k: f.get(k) for k in CONTRACT_KEYS}, sort_keys=True, ensure_ascii=False).encode())
 
 
 def review_required(f):
@@ -408,6 +414,7 @@ def cmd_start(a):
         raise MondayError(f"{a.id} depende de features no terminadas: {pending_deps}")
     if f["status"] == "pending":
         f["started_at"] = now()
+        f["contract"] = contract_hash(f)
         if git_available(root):
             f["base"] = head_or_empty(root)
             policy = load_policy()
@@ -515,7 +522,9 @@ def cmd_done(a):
     policy = load_policy()
     checks = []                                   # (nombre, estado, detalle)
 
-    init_status, init_detail = run_init(root, a.timeout)
+    if f.get("contract") != contract_hash(f):
+        checks.append(("contract", "FAIL", "risk/scope/criterios cambiaron desde `start` sin `monday amend`"))
+    init_status, init_detail = run_init(root, a.timeout, full=f["risk"] != "low")
     checks.append(("init.sh", init_status, init_detail))
     results = verify_criteria(root, f, manual, a.timeout)
     for cid, status, cmd, detail in results:
@@ -562,6 +571,29 @@ def cmd_done(a):
     if tpl.is_file() and cur.is_file():
         shutil.copyfile(tpl, cur)
     print(f"{a.id} done. Resumen movido a progress/history.md y progress/current.md reiniciado.")
+    return 0
+
+
+def cmd_amend(a):
+    root = find_root()
+    data = load_features(root)
+    f = get_feature(data, a.id)
+    if f["status"] not in ("in_progress", "blocked"):
+        raise MondayError(f"{a.id} no está en curso: edita features.json directamente")
+    errs = validate_features(data)
+    if errs:
+        raise MondayError("features.json inválido:\n  " + "\n  ".join(errs))
+    if f.get("contract") == contract_hash(f):
+        print(f"{a.id}: el contrato no ha cambiado")
+        return 0
+    f["contract"] = contract_hash(f)
+    dropped = f.pop("review", None)
+    save_features(root, data)
+    crit = ", ".join(c["id"] + ("" if "verify" in c else " (manual)") for c in f["acceptance_criteria"])
+    append_history(root, f"## {now()[:10]} · {a.id} · CONTRATO MODIFICADO\n- Motivo: {a.reason}\n"
+                         f"- Ahora: risk {f['risk']} · scope {', '.join(f['scope'])} · criterios {crit}"
+                         + ("\n- La revisión previa queda invalidada" if dropped else ""))
+    print(f"{a.id}: contrato actualizado y registrado en history.md" + (" (revisión invalidada)" if dropped else ""))
     return 0
 
 
@@ -630,14 +662,20 @@ def hook_pre(platform, payload, root):
 def hook_stop(platform, payload, root):
     if platform == "claude" and payload.get("stop_hook_active"):
         return None
-    if git_available(root) and not git(root, "status", "--porcelain", "--", ".").strip():
-        return None                                       # nada cambió: nada pudo romperse
+    if git_available(root):
+        policy = load_policy()
+        dirty = [p for p in changed_files(root, "HEAD" if head_or_empty(root) != EMPTY_TREE else EMPTY_TREE)
+                 if not matches(p, policy["always_writable"])]
+        if not dirty:
+            return None                                   # solo cambió la memoria (o nada): nada pudo romperse
     status, detail = run_init(root, timeout=600)
     marker = root / ".monday" / "runtime" / "stop-block.json"
     if status == "PASS":
         marker.unlink(missing_ok=True)
         return None
-    sig = sha256(detail.encode())
+    # Firma = qué comprobaciones fallan, no su salida (que incluye tiempos): el mismo fallo no bloquea dos veces.
+    failing = sorted(l for l in detail.splitlines() if re.match(r"(FAIL|UNAVAILABLE|ERROR)\b", l))
+    sig = sha256("\n".join(failing or [detail.splitlines()[0] if detail else ""]).encode())
     if marker.is_file() and json.loads(marker.read_text()).get("sig") == sig:
         marker.unlink()                                   # mismo fallo ya señalado: no bloquear en bucle
         return None
@@ -813,13 +851,13 @@ def cmd_install(a):
         return 0
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     bdir = target / ".monday" / "backups" / stamp
-    journal = {"version": VERSION, "at": now(), "created": {}, "modified": []}
+    journal = {"version": VERSION, "at": now(), "created": {}, "modified": {}}
     for rel, data, kind in changes:
         dest = target / rel
         if dest.exists():
             (bdir / "files" / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(dest, bdir / "files" / rel)
-            journal["modified"].append(rel)
+            journal["modified"][rel] = sha256(data)       # hash tras instalar: si cambia, rollback no lo pisa
         else:
             journal["created"][rel] = sha256(data)
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -829,14 +867,14 @@ def cmd_install(a):
     for rel in stale:
         (bdir / "files" / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(target / rel), bdir / "files" / rel)
-        journal["modified"].append(rel)
+        journal["modified"][rel] = "absent"
     manifest = {"version": VERSION, "installed_at": now(), "platforms": platforms,
                 "files": {rel: file_hash(target / rel) for rel in sorted(new_managed)}}
     mpath = target / ".monday" / "manifest.json"
     if mpath.is_file():
         (bdir / "files" / ".monday").mkdir(parents=True, exist_ok=True)
         shutil.copy2(mpath, bdir / "files" / ".monday" / "manifest.json")
-        journal["modified"].append(".monday/manifest.json")
+        journal["modified"][".monday/manifest.json"] = None
     else:
         journal["created"][".monday/manifest.json"] = None
     mpath.write_text(json.dumps(manifest, indent=2) + "\n")
@@ -869,7 +907,11 @@ def cmd_rollback(a):
             print(f"  borrar {rel}")
             if not a.dry_run:
                 dest.unlink()
-        for rel in journal["modified"]:
+        for rel, digest in journal["modified"].items():
+            if digest and file_hash(target / rel) != digest and not a.force:
+                kept.append(rel)
+                print(f"  conservar {rel} (modificado después de instalar; original en {bdir.relative_to(target)}/files; --force para restaurarlo)")
+                continue
             print(f"  restaurar {rel}")
             if not a.dry_run:
                 (target / rel).parent.mkdir(parents=True, exist_ok=True)
@@ -877,19 +919,20 @@ def cmd_rollback(a):
         if a.dry_run:
             print("(dry-run: no se ha cambiado nada)")
             continue
+        if kept:                                          # el backup se conserva mientras haga falta para --force
+            print("Revertido parcialmente; conservados: " + ", ".join(kept) + ". Para terminar: `python3 <repo Monday>/core/monday.py rollback <proyecto> --force`.")
+            continue
         shutil.rmtree(bdir)
         for rel in journal["created"]:                    # limpia directorios que quedaron vacíos
             d = (target / rel).parent
             while d != target and d.is_dir() and not any(d.iterdir()):
                 d.rmdir()
                 d = d.parent
-        if kept:
-            print("Revertido con archivos conservados: " + ", ".join(kept))
     if not a.dry_run and broot.is_dir() and not any(broot.iterdir()):
         broot.rmdir()
         mon = target / ".monday"
-        if mon.is_dir() and not any(mon.iterdir()):
-            mon.rmdir()
+        if mon.is_dir() and {p.name for p in mon.iterdir()} <= {"runtime"}:
+            shutil.rmtree(mon)                            # solo quedaba estado efímero (hooks.log, marcadores)
     return 0
 
 
@@ -916,6 +959,8 @@ def main(argv=None):
     s = sub.add_parser("review", help="registra el veredicto de la revisión independiente")
     s.add_argument("id"); s.add_argument("--verdict", required=True, choices=["approve", "changes_required"])
     s.add_argument("--by", required=True); s.add_argument("--notes"); s.set_defaults(f=cmd_review)
+    s = sub.add_parser("amend", help="registra un cambio de contrato (risk/scope/criterios) de una feature en curso")
+    s.add_argument("id"); s.add_argument("--reason", required=True); s.set_defaults(f=cmd_amend)
     s = sub.add_parser("block", help="bloquea una feature y registra el motivo (escalado)")
     s.add_argument("id"); s.add_argument("--reason", required=True); s.set_defaults(f=cmd_block)
     s = sub.add_parser("guard", help="¿puedo escribir esta ruta / ejecutar este comando sin pedir permiso?")

@@ -60,6 +60,7 @@ $M verify F-001           # ejecuta los criterios: PASS / FAIL / UNAVAILABLE / m
 $M scope F-001            # archivos cambiados frente al alcance
 $M review F-001 --verdict approve --by monday-reviewer
 $M done F-001             # cierra solo si todo lo anterior lo respalda
+$M amend F-001 --reason "…"   # cambio de risk/scope/criterios: queda en el historial
 $M block F-001 --reason "…"
 $M guard src/x.py         # ¿puedo escribir aquí sin pedir permiso? (alternativa sin hooks)
 ```
@@ -88,7 +89,7 @@ Otra plataforma (Codex, Cursor…) se añade con una carpeta en `adapters/` y un
 ## Probar Monday desde cero
 
 ```bash
-./init.sh                                   # harness de este repo + 32 pruebas (escenarios S1–S8, distribución, diseño)
+./init.sh                                   # harness de este repo + 39 pruebas (escenarios S1–S8, distribución, diseño, regresiones)
 bash tests/install_roundtrip.sh             # instalar → init.sh → reinstalar → rollback --all deja el directorio vacío
 bash tests/e2e_adapters.sh claude           # agentes reales (consume tokens; requiere sesión iniciada)
 bash tests/e2e_adapters.sh antigravity
@@ -115,6 +116,7 @@ Este repositorio usa Monday para sí mismo: `.monday` apunta a `core/` y su trab
 - Los hooks interceptan las herramientas de edición y los comandos de `policy.json`; un comando de shell que escribe archivos fuera de alcance no se detecta hasta `monday done`.
 - `features.json` es un archivo editable: Monday detecta incoherencias de forma, no la mala fe. El autor de una revisión (`--by`) es declarativo.
 - En Antigravity, lo fuera de alcance se **deniega** (no hay un «preguntar» fiable en modo `accept-edits`): el humano amplía el `scope` o ejecuta la acción.
+- En un monorepo con Monday en un subdirectorio, el alcance solo mira ese subdirectorio, y los archivos en `.gitignore` no cuentan como cambios.
 - Probado en Linux. macOS debería funcionar (Bash + Python); Windows no está soportado.
 
 ## Licencia

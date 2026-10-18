@@ -31,7 +31,9 @@ Las acciones irreversibles o con efectos fuera del workspace no son un nivel de 
 5. **Implementar** en pasos pequeños; actualiza «Estado y próximos pasos» de `current.md` al completar cada paso o antes de una pausa larga.
 6. **Verificar** con `$M verify <id>` y `$M scope <id>` mientras iteras.
 7. **Revisar** (obligatorio si `risk: high` o `review_required`): revisión independiente (§3), registrada con `$M review`.
-8. **Cerrar** con `$M done <id>`: ejecuta `./init.sh`, los criterios, el alcance y la revisión. Si rechaza, no hay éxito: corrige o bloquea. Antes, rellena «Resumen» en `current.md`; `done` lo mueve a `history.md`.
+8. **Cerrar** con `$M done <id>`: ejecuta `./init.sh` (`--full` si el riesgo es medium o high), los criterios, el alcance, la revisión y comprueba que el contrato no cambió desde `start`. Si rechaza, no hay éxito: corrige o bloquea. Antes, rellena «Resumen» en `current.md`; `done` lo mueve a `history.md`.
+
+Si el contrato (risk, scope, criterios) debe cambiar durante el trabajo, edítalo y registra el cambio con `$M amend <id> --reason "…"`: queda en el historial e invalida la revisión previa. Ampliar alcance o rebajar riesgo es decisión del humano.
 
 Si no puedes continuar: `$M block <id> --reason "<qué bloquea · opciones · recomendación>"` y escala.
 
@@ -70,7 +72,7 @@ Devuelve: STATUS + ≤15 líneas
 
 - **Fresca:** ejecutada después del último cambio. **Observada:** el comando y su salida, no «debería funcionar». **Capaz de fallar:** una comprobación que no puede fallar ante el defecto no es evidencia.
 - **Estados:** `PASS` (ejecutada y superada) · `FAIL` (ejecutada y fallida) · `UNAVAILABLE` (no se pudo ejecutar: falta herramienta o entorno) · `MANUAL` (comprobada por una persona o agente, con evidencia escrita). `UNAVAILABLE` nunca cuenta como éxito: o se aporta evidencia manual (`--manual AC2="…"`) o la feature no se cierra.
-- **Rápida vs completa:** `./init.sh` (integridad del harness + checks rápidos) antes de escribir código y al cerrar; `./init.sh --full` (suite completa, e2e/UI) antes de cerrar features de riesgo medium/high o que toquen flujos de usuario.
+- **Rápida vs completa:** `./init.sh` (integridad del harness + checks rápidos) antes de escribir código; `./init.sh --full` (suite completa, e2e/UI) la ejecuta `done` al cerrar features de riesgo medium/high.
 - **Bugs:** primero un repro que falle; después el arreglo; el mismo repro pasa a ser test de regresión.
 - **Al responder al humano:** di qué se ejecutó y qué no. «No verificado» dicho a tiempo vale más que un éxito ambiguo.
 

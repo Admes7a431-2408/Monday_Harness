@@ -30,7 +30,7 @@ Lectura obligatoria antes de cambiar Monday. Normativa: `Arquitectura Óptima de
 
 | Mecanismo | Tipo | Qué garantiza | Límite |
 |---|---|---|---|
-| `monday done` | Determinista | No hay `done` sin `init.sh`, criterios, alcance y revisión (si aplica) en verde; deja evidencia en `history.md` | Un agente puede editar `features.json` a mano; `check` detecta incoherencias de forma, no la intención |
+| `monday done` | Determinista | No hay `done` sin `init.sh` (`--full` si risk ≥ medium), criterios, alcance, revisión (si aplica) y contrato sin cambios desde `start`; deja evidencia en `history.md` | Quien edita `features.json` y recalcula la huella a propósito puede falsearlo: detecta descuidos y atajos, no fraude deliberado |
 | Criterios con `verify` | Determinista | Evidencia fresca ejecutada por `monday`, no declarada por el agente | La calidad del criterio depende de quien lo escribe (el método exige que pueda fallar) |
 | Revisión anclada al diff | Determinista | Un cambio posterior a la revisión invalida el `approve` | Quién revisó (`--by`) es declarativo |
 | Guarda `PreToolUse` | Plataforma | Escrituras fuera de `scope`, rutas protegidas y comandos de `policy.json` se interceptan antes de ejecutarse | Comandos de shell que escriben archivos no se analizan (los detecta `done`); los patrones son una red, no un sandbox |
@@ -45,7 +45,7 @@ Lectura obligatoria antes de cambiar Monday. Normativa: `Arquitectura Óptima de
 | Carga de `AGENTS.md` | Vía `CLAUDE.md` → `@AGENTS.md` — e2e ✔ | Nativa — e2e ✔ |
 | Estado inyectado al iniciar sesión | `SessionStart` (stdout) — e2e ✔ | `SessionStart` (`injectSteps`) — e2e ✔ |
 | Guarda de alcance | `PreToolUse` → `ask` (pregunta en interactivo; deniega en headless) — e2e ✔ headless | `PreToolUse` → `deny` (`ask`/`force_ask` se autoaprueban en `accept-edits`) — e2e ✔ headless |
-| No terminar en rojo | `Stop`/`SubagentStop` → `block` — e2e ✔ | `Stop` → `continue` — e2e ✔ |
+| No terminar en rojo | `Stop` → `block` — e2e ✔ | `Stop` → `continue` — e2e ✔ |
 | Agentes por rol | `.claude/agents/` con `model`/`tools` — e2e ✔ (`--agent`) | `.agents/agents/` — e2e ✔ (`--agent`); modelo y herramientas por agente **no verificados** (heredan la sesión) |
 | Requiere validación manual | Diálogo `ask` en sesión interactiva; delegación real del líder a subagentes | Antigravity IDE (solo se probó el CLI); restricción de herramientas del explorador/revisor |
 
@@ -69,7 +69,7 @@ Contexto: hay que validar JSON, emparejar globs con `**`, consultar git y hablar
 
 ### D-005 — Hooks finos que llaman al CLI (2026-10-18)
 
-Contexto: AgentForge evitó hooks (AD-006) y todo su cumplimiento quedó en conductual o a posteriori. Decisión: tres hooks por plataforma (`SessionStart`, `PreToolUse`, `Stop`), toda la lógica en `monday.py hook`, misma política para ambas plataformas. Un hook que falla internamente no bloquea al agente (*fail-open*, con aviso por stderr). Alternativas descartadas: clasificador de prompts por regex (AgentForge lo descartó con evidencia); lógica en cada adaptador (copias divergentes). Consecuencias: la respuesta a la plataforma se adapta a su semántica observada (`ask` en Claude, `deny` en agy).
+Contexto: AgentForge evitó hooks (AD-006) y todo su cumplimiento quedó en conductual o a posteriori. Decisión: tres hooks por plataforma (`SessionStart`, `PreToolUse`, `Stop`), toda la lógica en `monday.py hook`, misma política para ambas plataformas. Un hook que falla internamente no bloquea al agente (*fail-open*, con aviso por stderr). Alternativas descartadas: clasificador de prompts por regex (AgentForge lo descartó con evidencia); lógica en cada adaptador (copias divergentes). Consecuencias: la respuesta a la plataforma se adapta a su semántica observada (`ask` en Claude, `deny` en agy). Sin `SubagentStop`: pedir «corrige» a un explorador o revisor de solo lectura es incoherente; quien responde del resultado es el líder (`Stop`). El anti-bucle firma *qué* comprobaciones fallan, no su salida, y el hook no corre si solo cambió la memoria.
 
 ### D-006 — El líder escribe la memoria; explorador y revisor son de solo lectura (2026-10-18)
 
@@ -86,6 +86,10 @@ Contexto: un `approve` sobre un diff que luego cambia no prueba nada. Decisión:
 ### D-009 — `history.md` registra también rechazos (2026-10-18)
 
 Contexto: la automejora necesita detectar errores repetidos sin crear otro registro. Decisión: `done` rechazado, `review changes_required` y `block` añaden una entrada breve a `history.md`. Alternativas descartadas: un `errors.md` aparte (otro registro del mismo estado). Consecuencias: el revisor busca patrones en un único archivo.
+
+### D-010 — Huella del contrato y `monday amend` (2026-10-18)
+
+Contexto: la revisión independiente de M-001 demostró que rebajar `risk`, ampliar `scope` o vaciar un `verify` en `features.json` permitía un `done` aceptado sin rastro. Decisión: `start` guarda la huella de risk/scope/criterios/revisión/dependencias; `done` la exige intacta; `amend --reason` la renueva, lo registra en `history.md` e invalida la revisión. Alternativas descartadas: proteger `features.json` con la guarda (el líder debe poder añadir features); comparar con `git show <base>` (falla si la feature se creó sin commitear). Consecuencias: cambiar el contrato es posible pero siempre visible.
 
 ## Reglas aprendidas
 

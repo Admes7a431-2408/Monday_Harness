@@ -11,13 +11,14 @@ Primera versión definitiva de Monday. Reconstrucción completa: no comparte có
 - Núcleo agnóstico (`core/`) que se instala como copia versionada en `<proyecto>/.monday/`, con manifiesto de hashes para detectar divergencias.
 - `AGENTS.md` como punto de entrada (<200 líneas) con bloque gestionado; método con tres modos (directo, registrado, orquestado) y riesgo low/medium/high.
 - Memoria del proyecto según la guía: `features.json` (contrato ejecutable), `progress/current.md`, `progress/exploration_logs.md`, `progress/history.md`, `docs/architecture.md`.
-- CLI `monday.py` (Python 3 stdlib): `status`, `check`, `start`, `verify`, `scope`, `review`, `done`, `block`, `guard`, `hook`, `install`, `rollback`.
+- CLI `monday.py` (Python 3 stdlib): `status`, `check`, `start`, `verify`, `scope`, `review`, `done`, `amend`, `block`, `guard`, `hook`, `install`, `rollback`.
 - `monday done`: cierre solo con `init.sh`, criterios ejecutables, alcance contra git y revisión anclada al diff en verde; estados `PASS`/`FAIL`/`UNAVAILABLE`/`MANUAL`; rechazos registrados en el historial.
 - Roles explorador, implementador y revisor neutrales a la plataforma.
-- Adaptador Claude Code: `CLAUDE.md` → `@AGENTS.md`, hooks `SessionStart`/`PreToolUse`/`Stop`/`SubagentStop`, agentes `monday-explorer|implementer|reviewer`.
+- Adaptador Claude Code: `CLAUDE.md` → `@AGENTS.md`, hooks `SessionStart`/`PreToolUse`/`Stop`, agentes `monday-explorer|implementer|reviewer`.
 - Adaptador Antigravity: `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`) y agentes en `.agents/agents/`.
 - Instalación que fusiona en vez de sobrescribir, actualización que se detiene ante ediciones locales y `rollback` (`--all` para desinstalar).
-- 32 pruebas deterministas (escenarios S1–S8, distribución, integridad del diseño), `tests/install_roundtrip.sh` y validación con agentes reales `tests/e2e_adapters.sh`.
+- `monday amend`: los cambios de contrato de una feature en curso quedan registrados e invalidan la revisión.
+- 39 pruebas deterministas (escenarios S1–S8, distribución, integridad del diseño, regresiones de la revisión independiente), `tests/install_roundtrip.sh` y validación con agentes reales `tests/e2e_adapters.sh`.
 
 ### Cambiado respecto a AgentForge
 

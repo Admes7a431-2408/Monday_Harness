@@ -18,7 +18,7 @@ Este proyecto usa el harness **Monday**: el repositorio es el sistema y la memor
 **Reglas de oro**
 
 1. **Evidencia o nada.** No digas «hecho», «arreglado» ni «funciona» sin un comando ejecutado después del último cambio y su salida. Lo no verificado se declara no verificado.
-2. **`done` lo decide `monday`.** Una feature solo se marca `done` con `python3 .monday/monday.py done <id>` aceptado; nunca edites `status` a mano. Si lo rechaza, no hay éxito.
+2. **`done` lo decide `monday`.** Una feature solo se marca `done` con `python3 .monday/monday.py done <id>` aceptado; nunca edites `status` a mano ni cambies el contrato de una feature en curso sin `monday amend`. Si lo rechaza, no hay éxito.
 3. **Alcance.** Toca solo lo que exige el objetivo (`scope` de la feature). Lo que encuentres fuera se anota, no se arregla. Si necesitas salir, detente y escala.
 4. **Puertas humanas.** Pide permiso antes de acciones irreversibles o con efectos fuera del proyecto: borrar datos, reescribir historia git, push/merge/tag, publicar, desplegar, dependencias o configuración globales, secretos.
 5. **Piensa antes, cambia poco.** Enuncia qué vas a cambiar y por qué; si hay varias interpretaciones, dilo. La solución más simple que cumpla los criterios; cambios quirúrgicos, estilo existente.
