@@ -163,10 +163,10 @@
       "review": {
         "verdict": "approve",
         "by": "monday-reviewer",
-        "at": "2026-10-19T23:00:42-04:00",
-        "fingerprint": "b15ef945a349fb7251ba45de6407b8a5af77debe627c15e1fbc7f64159389739",
+        "at": "2026-10-19T23:03:11-04:00",
+        "fingerprint": "4e6aeb65efbc48babe3496b949ba4fb4c800022d830f9de6432096394b03d6ca",
         "files": 9,
-        "notes": "4d3aab6..HEAD: la guarda genérica de agy (matcher *, rutas en los argumentos) cubre toda herramienta de escritura que nombra el binario; 50 tests OK, scope PASS, criterios y scripts e2e/release_check sin cambios. Amend legítimo si la autorización humana de la misión (§6) existe tal como se cita: es estrecho y sin él solo cabía debilitar AC2. Minors: el prefijo READ_ONLY_TOOL exime nombres de escritura como search_replace o find_and_replace, y las claves filename/source/destination no se guardan (reproducido; ninguno está hoy en el binario); conviene que un verbo de escritura (replace|edit|write|create|delete|move|patch) prevalezca sobre el prefijo. La regla 'falla cerrada ante lo desconocido' exagera: ante claves desconocidas falla abierta. Falsos positivos: escrituras fuera del proyecto (artefactos en ~/.gemini/.../brain, generate_image a /tmp) se deniegan incluso sin feature activa. Coste unos 77 ms por herramienta."
+        "notes": "539a7be..60cc003: WRITE_VERB prevalece sobre el prefijo (search_replace y find_and_replace se deniegan), claves ambiguas solo con valor de aspecto de ruta (write_file+filename se deniega), artefactos de agy exentos. 50 OK, scope PASS. Minors: si artifactDirectoryPath fuera la raíz del proyecto o la contuviera, la exención anularía toda la guarda, rutas protegidas incluidas (reproducido con un payload sintético; el valor lo pone la plataforma y lo observado está en ~/.gemini); se arregla ignorando la exención cuando own contiene root. Falso positivo: claves *Name con un valor tipo archivo (generate_image ImageName=logo.png) se deniegan si hay una feature activa."
       }
     }
   ]

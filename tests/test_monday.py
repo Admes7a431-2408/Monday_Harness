@@ -325,6 +325,12 @@ class S8OutOfScope(Base):
             "workspacePaths": [str(p.dir)], "artifactDirectoryPath": str(p.dir.parent / "agy-artifacts"),
             "toolCall": {"name": "write_to_file", "args": {"TargetFile": str(p.dir.parent / "agy-artifacts" / "task.md")}}}))
         self.assertEqual(r.stdout.strip(), "", "los artefactos propios de la plataforma no son el proyecto")
+        for artifacts in (p.dir, p.dir.parent):                  # un «directorio de artefactos» que contiene el proyecto no exime
+            r = p.m("hook", "pre", "--platform", "antigravity", inp=json.dumps({
+                "workspacePaths": [str(p.dir)], "artifactDirectoryPath": str(artifacts),
+                "toolCall": {"name": "edit_file", "args": {"Path": str(p.dir / ".agents" / "hooks.json")}}}))
+            self.assertEqual(json.loads(r.stdout)["decision"], "deny", artifacts)
+        self.assertIsNone(pre("generate_image", {"ImageName": "logo.png"}), "un nombre no es una ruta")
         self.assertIsNone(pre("read_file", {"Path": out}), "leer fuera de alcance está permitido")
         self.assertIsNone(pre("view_file", {"AbsolutePath": "/etc/hosts"}))
         matcher = json.loads(p.read(".agents/hooks.json"))["monday"]["PreToolUse"][0]["matcher"]

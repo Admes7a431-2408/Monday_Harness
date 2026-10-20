@@ -688,7 +688,7 @@ def paths_in_args(args):
             found.extend(re.findall(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", value, flags=re.M))
             if re.search(r"(path|paths|file|files|dir|directory|uri)$", key, re.I) and "\n" not in value:
                 found.append(value.strip())
-            elif (re.search(r"(filename|name|source|src|destination|dest|dst)$", key, re.I)
+            elif (re.search(r"(filename|source|src|destination|dest|dst)$", key, re.I)
                   and re.fullmatch(r"\S+", value) and ("/" in value or re.search(r"\.\w{1,8}$", value))):
                 found.append(value)                               # clave ambigua: solo si el valor parece una ruta
     walk("", args)
@@ -717,6 +717,8 @@ def hook_pre(platform, payload, root):
             reason = guard_path(root, args[WRITE_TOOLS["claude"][tool]])
     elif WRITE_VERB.search(tool) or not READ_ONLY_TOOL.match(tool):    # un verbo de escritura prevalece sobre el prefijo
         own = os.path.realpath(payload.get("artifactDirectoryPath") or "/nonexistent")
+        if (str(root) + os.sep).startswith(own + os.sep):                # un directorio que contiene el proyecto no exime nada
+            own = "/nonexistent"
         paths = [p for p in paths_in_args(args)                          # los artefactos propios de la plataforma no son el proyecto
                  if not os.path.realpath(p).startswith(own + os.sep)]
         reason = next((r for r in (guard_path(root, p) for p in paths) if r), None)
