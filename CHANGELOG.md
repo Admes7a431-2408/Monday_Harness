@@ -4,7 +4,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); [seman
 
 ## [1.0.0] - 2026-10-19
 
-First public version of Monday. It is a complete rebuild: Monday 1.0 shares no code with the AgentForge releases below. Their history is preserved in this repository through a merge that keeps it intact, without rewriting it.
+First public version of Monday. It is a rebuild rather than an evolution of the AgentForge codebase below; only a few small helpers (such as the glob matcher used for scope) closely mirror AgentForge's. Their history is preserved in this repository through a merge that keeps it intact, without rewriting it.
 
 ### Added
 

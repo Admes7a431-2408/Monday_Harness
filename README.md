@@ -89,7 +89,7 @@ The last verification result is persisted and shown by `monday status`, because 
 Platform differences that were measured, not assumed:
 
 - In `agy`, a `PreToolUse` hook answering `ask` is auto-approved in `accept-edits` mode, so Monday uses `deny` there.
-- `agy -p` always returns the model's last text with `status: SUCCESS`, even if a hook blocked it afterwards. Judge the outcome with `monday status` or `monday done`, never with the agent's message.
+- In our runs, `agy -p` returned the model's last text with `status: SUCCESS`, even when a hook had blocked it afterwards, and no hook could change that output. Judge the outcome with `monday status` or `monday done`, never with the agent's message.
 
 ## Getting started
 
@@ -145,7 +145,7 @@ A minimal feature:
 | Kind | What | Command |
 |---|---|---|
 | Deterministic | 49 unit and scenario tests: the eight validation scenarios, install/update/rollback, design integrity, regressions | `./init.sh` |
-| Simulated | Hook behaviour with recorded platform payloads (part of the suite above) | `python3 -m unittest discover -s tests -v` |
+| Simulated | Hook behaviour with hand-built payloads in the format observed on each platform (part of the suite above) | `python3 -m unittest discover -s tests -v` |
 | Release checks | Contract integrity, secrets and private-data audit, version coherence, preserved history | `bash tests/release_check.sh` |
 | Clean-folder quick start | The commands in this README, from a fresh clone | `bash tests/quickstart.sh` |
 | Real agents | 16 checks on both platforms, including adversarial runs. Not deterministic; it spends tokens and needs logged-in CLIs | `bash tests/e2e_adapters.sh` |
