@@ -159,7 +159,15 @@
       "started_at": "2026-10-19T22:32:56-04:00",
       "base": "44b9c72a0ebb7e4d13a636cb81e901dd76bc920a",
       "preexisting": {},
-      "contract": "baca5514845ef025907c2c6f5289c879daec689faf066d495c93697e8d62e758"
+      "contract": "baca5514845ef025907c2c6f5289c879daec689faf066d495c93697e8d62e758",
+      "review": {
+        "verdict": "approve",
+        "by": "monday-reviewer",
+        "at": "2026-10-19T23:00:42-04:00",
+        "fingerprint": "b15ef945a349fb7251ba45de6407b8a5af77debe627c15e1fbc7f64159389739",
+        "files": 9,
+        "notes": "4d3aab6..HEAD: la guarda genérica de agy (matcher *, rutas en los argumentos) cubre toda herramienta de escritura que nombra el binario; 50 tests OK, scope PASS, criterios y scripts e2e/release_check sin cambios. Amend legítimo si la autorización humana de la misión (§6) existe tal como se cita: es estrecho y sin él solo cabía debilitar AC2. Minors: el prefijo READ_ONLY_TOOL exime nombres de escritura como search_replace o find_and_replace, y las claves filename/source/destination no se guardan (reproducido; ninguno está hoy en el binario); conviene que un verbo de escritura (replace|edit|write|create|delete|move|patch) prevalezca sobre el prefijo. La regla 'falla cerrada ante lo desconocido' exagera: ante claves desconocidas falla abierta. Falsos positivos: escrituras fuera del proyecto (artefactos en ~/.gemini/.../brain, generate_image a /tmp) se deniegan incluso sin feature activa. Coste unos 77 ms por herramienta."
+      }
     }
   ]
 }

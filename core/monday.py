@@ -670,6 +670,7 @@ SHELL_TOOLS = {"claude": ("Bash", "command"), "antigravity": ("run_command", "Co
 # agy cambia su catálogo de herramientas sin cambiar de versión (visto: write_to_file/TargetFile y edit_file/Path).
 # No se enumeran las de escritura: toda herramienta que no sea de lectura se guarda sobre las rutas de sus argumentos.
 READ_ONLY_TOOL = re.compile(r"^(view_|read_|list_|search|grep|find|codebase_search|get_|trajectory_|knowledge_)")
+WRITE_VERB = re.compile(r"replace|edit|write|create|delete|remove|move|rename|patch|append|insert|save", re.I)
 
 
 def paths_in_args(args):
@@ -687,6 +688,9 @@ def paths_in_args(args):
             found.extend(re.findall(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", value, flags=re.M))
             if re.search(r"(path|paths|file|files|dir|directory|uri)$", key, re.I) and "\n" not in value:
                 found.append(value.strip())
+            elif (re.search(r"(filename|name|source|src|destination|dest|dst)$", key, re.I)
+                  and re.fullmatch(r"\S+", value) and ("/" in value or re.search(r"\.\w{1,8}$", value))):
+                found.append(value)                               # clave ambigua: solo si el valor parece una ruta
     walk("", args)
     return [re.sub(r"^file://", "", p) for p in found if p]
 
@@ -711,8 +715,11 @@ def hook_pre(platform, payload, root):
     elif platform == "claude":
         if tool in WRITE_TOOLS["claude"] and args.get(WRITE_TOOLS["claude"][tool]):
             reason = guard_path(root, args[WRITE_TOOLS["claude"][tool]])
-    elif not READ_ONLY_TOOL.match(tool):
-        reason = next((r for r in (guard_path(root, p) for p in paths_in_args(args)) if r), None)
+    elif WRITE_VERB.search(tool) or not READ_ONLY_TOOL.match(tool):    # un verbo de escritura prevalece sobre el prefijo
+        own = os.path.realpath(payload.get("artifactDirectoryPath") or "/nonexistent")
+        paths = [p for p in paths_in_args(args)                          # los artefactos propios de la plataforma no son el proyecto
+                 if not os.path.realpath(p).startswith(own + os.sep)]
+        reason = next((r for r in (guard_path(root, p) for p in paths) if r), None)
     if not reason:
         return None                                       # sin salida = sin objeción
     reason = "Monday: " + reason

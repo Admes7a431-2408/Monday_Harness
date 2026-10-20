@@ -316,6 +316,15 @@ class S8OutOfScope(Base):
         self.assertIsNone(pre("replace_file_content", {"TargetFile": inside, "TargetContent": "// comentario",
                                                        "ReplacementContent": "/etc/passwd"}),
                           "el contenido no es una ruta")
+        self.assertEqual(pre("search_replace", {"file_path": out, "old": "a", "new": "b"}), "deny", "verbo de escritura > prefijo")
+        self.assertEqual(pre("find_and_replace", {"TargetFile": out}), "deny")
+        self.assertEqual(pre("write_file", {"filename": "README.md", "content": "x"}), "deny")
+        self.assertEqual(pre("move_file", {"source": "src/calc.py", "destination": "README.md"}), "deny")
+        self.assertIsNone(pre("run_snippet_tool", {"Source": "x = 1"}), "código de una línea no es una ruta")
+        r = p.m("hook", "pre", "--platform", "antigravity", inp=json.dumps({
+            "workspacePaths": [str(p.dir)], "artifactDirectoryPath": str(p.dir.parent / "agy-artifacts"),
+            "toolCall": {"name": "write_to_file", "args": {"TargetFile": str(p.dir.parent / "agy-artifacts" / "task.md")}}}))
+        self.assertEqual(r.stdout.strip(), "", "los artefactos propios de la plataforma no son el proyecto")
         self.assertIsNone(pre("read_file", {"Path": out}), "leer fuera de alcance está permitido")
         self.assertIsNone(pre("view_file", {"AbsolutePath": "/etc/hosts"}))
         matcher = json.loads(p.read(".agents/hooks.json"))["monday"]["PreToolUse"][0]["matcher"]
