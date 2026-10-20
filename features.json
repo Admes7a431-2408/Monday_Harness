@@ -107,7 +107,7 @@
       "id": "M-005",
       "title": "Preparar la publicación de Monday 1.0.0 (identidad pública, historial unido con AgentForge, auditoría previa)",
       "description": "Sin operaciones remotas: renombrar el repositorio, push y release requieren autorización humana explícita.",
-      "status": "in_progress",
+      "status": "done",
       "risk": "high",
       "scope": [
         "README.md",
@@ -163,11 +163,12 @@
       "review": {
         "verdict": "approve",
         "by": "monday-reviewer",
-        "at": "2026-10-19T23:03:11-04:00",
-        "fingerprint": "4e6aeb65efbc48babe3496b949ba4fb4c800022d830f9de6432096394b03d6ca",
+        "at": "2026-10-19T23:04:53-04:00",
+        "fingerprint": "cf2a13d76c3031106d90bfe42dea687db1449f199a284ecc91e533c2bdb1d5e7",
         "files": 9,
-        "notes": "539a7be..60cc003: WRITE_VERB prevalece sobre el prefijo (search_replace y find_and_replace se deniegan), claves ambiguas solo con valor de aspecto de ruta (write_file+filename se deniega), artefactos de agy exentos. 50 OK, scope PASS. Minors: si artifactDirectoryPath fuera la raíz del proyecto o la contuviera, la exención anularía toda la guarda, rutas protegidas incluidas (reproducido con un payload sintético; el valor lo pone la plataforma y lo observado está en ~/.gemini); se arregla ignorando la exención cuando own contiene root. Falso positivo: claves *Name con un valor tipo archivo (generate_image ImageName=logo.png) se deniegan si hay una feature activa."
-      }
+        "notes": "60cc003..e491f3f: la exención de artefactos se anula si el directorio es la raíz o la contiene; con '/' no exime nada. 'name' sale de las claves ambiguas. 50 OK, scope PASS. Residual minor: un artifactDirectoryPath dentro del proyecto seguiría eximiendo ese subárbol."
+      },
+      "done_at": "2026-10-19T23:13:14-04:00"
     }
   ]
 }

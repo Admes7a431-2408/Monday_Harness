@@ -51,3 +51,13 @@ Registro de cierres (`DONE`), rechazos, bloqueos y revisiones con su evidencia. 
 - Motivo: Corrección indispensable autorizada por el humano en la misión de release (§6 'correcciones indispensables'): AC2/AC4 falló porque agy ofreció edit_file/Path, que la guarda no conocía; se amplía el alcance a core/monday.py y adapters/antigravity/** solo para ese arreglo.
 - Ahora: risk high · scope README.md, CHANGELOG.md, docs/**, tests/**, AGENTS.md, core/templates/AGENTS.md, .gitignore, core/monday.py, adapters/antigravity/** · criterios AC1, AC2, AC3, AC4, AC5, AC6, AC7 (manual)
 - La revisión previa queda invalidada
+
+## 2026-10-19 · M-005 · DONE — Preparar la publicación de Monday 1.0.0 (identidad pública, historial unido con AgentForge, auditoría previa)
+- Evidencia: init.sh PASS · AC1 PASS · AC2 PASS · AC3 PASS · AC4 PASS · AC5 PASS · AC6 PASS · AC7 MANUAL · scope PASS · review PASS
+- Archivos: AGENTS.md, CHANGELOG.md, README.md, adapters/antigravity/hooks.json, core/monday.py, docs/architecture.md, tests/quickstart.sh, tests/release_check.sh, tests/test_monday.py
+- Evidencia manual AC7: evidencia: README en inglés revisado frente a la implementación y los tests: cubre qué es, por qué nació (AgentForge), problemas que reduce, principios, funcionamiento, núcleo agnóstico, integraciones implementadas vs probadas vs no validadas (incluida la variabilidad del catálogo de agy), instalación verificada por tests/quickstart.sh, limitaciones, evolución y contribución; afirmaciones precisadas tras la revisión independiente (approve)
+- Historial de AgentForge (main 2f3554d, tags v0.1.0/v0.9.0) unido como ancestro con merge `-s ours` (D-012): árbol intacto, push futuro fast-forward, sin reescritura.
+- README y CHANGELOG en inglés con la historia AgentForge → Monday, alcance honesto, integraciones implementadas vs probadas y limitaciones; instrucciones operativas siguen en español.
+- Nuevos `tests/release_check.sh` (contrato AC4, auditoría, versión, historial) y `tests/quickstart.sh` (README desde carpeta limpia).
+- Evaluación de limitaciones (revisión independiente coincide): ninguna bloquea un release presentado como «primer harness»; `done` siempre reverifica. M-004 (alias de amend) candidato a 1.0.1.
+- Decisiones humanas pendientes: publicar el commit con `.claude/scheduled_tasks.lock` (sessionId/pid, inocuo) o reescribir commits locales no publicados; publicar la guía en español que nombra a terceros; autorizar renombrado/push/release; enlaces globales a AgentForge.
