@@ -102,6 +102,62 @@
         "tests/**"
       ],
       "acceptance_criteria": []
+    },
+    {
+      "id": "M-005",
+      "title": "Preparar la publicación de Monday 1.0.0 (identidad pública, historial unido con AgentForge, auditoría previa)",
+      "description": "Sin operaciones remotas: renombrar el repositorio, push y release requieren autorización humana explícita.",
+      "status": "in_progress",
+      "risk": "high",
+      "scope": [
+        "README.md",
+        "CHANGELOG.md",
+        "docs/**",
+        "tests/**",
+        "AGENTS.md",
+        "core/templates/AGENTS.md",
+        ".gitignore"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "La batería determinista pasa",
+          "verify": "python3 -m unittest discover -s tests -q"
+        },
+        {
+          "id": "AC2",
+          "text": "AC4 de M-001 conserva su contrato original (texto y comando idénticos a 44b9c72) y sigue pasando con agentes reales",
+          "verify": "bash tests/release_check.sh ac4-contract && bash tests/e2e_adapters.sh"
+        },
+        {
+          "id": "AC3",
+          "text": "Las instrucciones del README funcionan desde una carpeta limpia (clon, install, init.sh, ciclo de una feature, rollback)",
+          "verify": "bash tests/quickstart.sh"
+        },
+        {
+          "id": "AC4",
+          "text": "Lo publicable no contiene secretos, datos privados, rutas personales, archivos temporales ni estado de runtime",
+          "verify": "bash tests/release_check.sh audit"
+        },
+        {
+          "id": "AC5",
+          "text": "Versión coherente entre core/VERSION, CHANGELOG y README",
+          "verify": "bash tests/release_check.sh version"
+        },
+        {
+          "id": "AC6",
+          "text": "El historial de AgentForge (main 2f3554d y tags v0.1.0, v0.9.0) es ancestro de main sin reescritura, de modo que el push sería fast-forward",
+          "verify": "bash tests/release_check.sh history"
+        },
+        {
+          "id": "AC7",
+          "text": "README en inglés cubre: qué es, por qué nació, problemas que reduce, funcionamiento, núcleo agnóstico, integraciones implementadas vs probadas, instalación, limitaciones, evolución y contribución; sin promesas no respaldadas"
+        }
+      ],
+      "started_at": "2026-10-19T22:32:56-04:00",
+      "base": "44b9c72a0ebb7e4d13a636cb81e901dd76bc920a",
+      "preexisting": {},
+      "contract": "e8baed173f738f5d39794e1d5b82a0fc2cc76d4a7f15bbf552e08eba5a162658"
     }
   ]
 }

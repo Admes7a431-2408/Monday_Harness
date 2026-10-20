@@ -1,125 +1,206 @@
 # Monday
 
-Harness agnóstico para agentes de IA: un flujo de trabajo consistente y resultados **verificables**, sea cual sea el modelo o el entorno (Claude Code, Antigravity, …).
+**A model-agnostic harness for software development with AI agents.**
 
-Monday no confía en lo que el agente dice: confía en lo que se puede ejecutar. Una tarea solo se cierra cuando `monday done` ha ejecutado las comprobaciones del proyecto, los criterios de aceptación, el control de alcance contra el diff de git y, si el riesgo lo exige, una revisión independiente anclada a ese mismo diff.
+Monday is my first attempt at building a modular workflow that makes working with AI coding agents more predictable, verifiable and safe, without depending on any specific model or vendor to guarantee the quality of the process.
 
-## De AgentForge a Monday
+> **Status: v1.0.0, first public version.** Monday is a working experiment, not a mature framework. It is tested on Linux with Claude Code and the Antigravity CLI. Read [Known limitations](#known-limitations) before relying on it.
 
-Monday nació como **AgentForge**, un experimento para aumentar la confianza en el trabajo de los agentes y mantener el mismo flujo con distintos modelos. Sus releases (`v0.1.0`, `v0.9.0`, en [Admes7a431-2408/AgentForge](https://github.com/Admes7a431-2408/AgentForge)) quedan como testigos de esa evolución: contratos, gates de calidad, delegación por coste cognitivo y adaptadores por plataforma.
+## Why it exists
 
-Monday 1.0 conserva esa intención y la reconstruye con menos piezas: la memoria vive en el repositorio y no en la conversación, los contratos son ejecutables, y las garantías importantes las aplica un CLI o un hook, no la buena voluntad del modelo. El análisis de qué se reutilizó, transformó o descartó está en [`progress/exploration_logs.md`](progress/exploration_logs.md) y las decisiones en [`docs/architecture.md`](docs/architecture.md).
+Monday started as **AgentForge**, a personal project born from a simple concern: I wanted to trust the work of my AI agents more, and I wanted the same workflow regardless of which model I was using that day.
 
-## Cómo funciona
+AgentForge explored contracts, quality gates, scope control and model routing. Its two releases are preserved as witnesses of that evolution: [`v0.1.0`](https://github.com/Admes7a431-2408/AgentForge/releases/tag/v0.1.0) (AgentForge) and [`v0.9.0`](https://github.com/Admes7a431-2408/AgentForge/releases/tag/v0.9.0) (first transition to the Monday name). Monday 1.0 keeps that intention but rebuilds it with fewer moving parts. The project's memory lives in the repository instead of the chat, contracts are executable, and the guarantees that matter are enforced by a CLI or a hook rather than by the model's goodwill. The Git history keeps both stages.
 
-Al instalar Monday en un proyecto se crean:
+This version is what I learned along the way. It is a starting point, not the final form of the idea.
 
-| Archivo | Para qué |
+## Problems it tries to reduce
+
+Monday does not eliminate these risks. It tries to make them smaller, visible and controllable:
+
+- **Lost context between sessions**: work is hard to resume once the conversation is gone.
+- **Results that look right but have no evidence**: "done" and "it works" stated by the agent itself.
+- **Scope creep and unauthorized actions**: agents editing what they were not asked to touch, or running irreversible commands.
+- **Inconsistent workflows across models and platforms.**
+- **Over-reliance on chat memory and on the agent's own claims.**
+
+## Principles
+
+- **Model independence**: the workflow and its quality criteria do not belong to an AI vendor.
+- **Modularity**: integrations with agents and environments are swappable adapters; the core does not change.
+- **Verification over blind trust**: results are backed by evidence whenever possible.
+- **Continuity**: important state persists outside the conversation.
+- **Explicit limits**: an agent's technical capability is not authorization to act.
+- **Simplicity**: every component must justify its existence, with no duplicated rules or context.
+- **Open evolution**: Monday is meant to learn and change through real use.
+
+## How it works
+
+Installing Monday into a project adds a small set of files. All of them are plain Markdown, JSON or Bash.
+
+| File | Purpose |
 |---|---|
-| `AGENTS.md` | Punto de entrada para cualquier agente (<200 líneas): protocolo, reglas de oro y mapa del proyecto |
-| `init.sh` | Validación rápida (`./init.sh`) y completa (`./init.sh --full`) del proyecto |
-| `features.json` | Backlog: alcance y criterios de aceptación ejecutables de cada tarea |
-| `progress/current.md` · `exploration_logs.md` · `history.md` | Tarea en curso · hallazgos que persisten · historial con evidencia |
-| `docs/architecture.md` | Convenciones, decisiones y reglas aprendidas |
-| `.monday/` | Núcleo gestionado (método, roles, política, CLI); no se edita en el proyecto |
-| Adaptadores | `CLAUDE.md` + `.claude/` (Claude Code), `.agents/` (Antigravity): hooks y agentes por rol |
+| `AGENTS.md` | Entry point for any agent (under 200 lines): session protocol, golden rules, project map |
+| `init.sh` | Quick (`./init.sh`) and full (`./init.sh --full`) validation of the project |
+| `features.json` | Backlog: each task's scope and executable acceptance criteria. This is the contract |
+| `progress/current.md`, `exploration_logs.md`, `history.md` | Task in progress, findings worth keeping, history with evidence |
+| `docs/architecture.md` | Conventions, decisions and rules learned from repeated mistakes |
+| `.monday/` | Managed core: method, roles, policy and the `monday.py` CLI (Python 3, standard library only) |
+| Adapters | `CLAUDE.md` + `.claude/` (Claude Code) and `.agents/` (Antigravity): hooks and role agents |
 
-El agente elige un **modo** según complejidad y riesgo: *directo* (cambio claro y local), *registrado* (feature con criterios) u *orquestado* (exploración delegada, implementación con brief y revisión independiente). Los detalles están en [`core/method.md`](core/method.md).
+The agent picks a **mode** based on complexity and risk:
 
-Los hooks de cada plataforma añaden tres garantías: el estado del proyecto se inyecta al iniciar sesión, las escrituras fuera del alcance de la feature en curso y los comandos irreversibles se interceptan antes de ejecutarse, y el agente no puede terminar con cambios y `init.sh` en rojo sin corregirlo o explicarlo.
+- **Direct**: a clear, local, low-risk change. Do it, run the relevant check, say what changed.
+- **Tracked**: a feature in `features.json` with criteria, closed with `monday done`.
+- **Orchestrated**: exploration by a read-only explorer, implementation from a brief, and an independent review.
 
-## Requisitos
+**Closing a task is decided by Monday, not by the agent.** `monday done <id>` accepts a feature only if all of these pass:
 
-- Python 3 (solo biblioteca estándar; probado con 3.14, requiere ≥ 3.8), Bash.
-- git (recomendado: sin git, el alcance y la revisión exigen evidencia manual).
-- Claude Code y/o Antigravity CLI para los adaptadores. En Antigravity headless (`agy -p`), para que el agente pueda ejecutar `./init.sh` hay que añadir `command(./init.sh)` a `permissions.allow` de `~/.gemini/antigravity-cli/settings.json` (configuración global; Monday no la toca).
+- `init.sh`;
+- every acceptance criterion's command;
+- the scope check against the git diff;
+- for high-risk work, an independent review anchored to the exact diff that was reviewed.
 
-## Instalar, actualizar y revertir
+Changing the contract after starting requires `monday amend`, which is recorded in the history. A failed or missing verification is never reported as success.
+
+Each adapter wires three hooks into its platform:
+
+- the project state is injected when a session starts;
+- writes outside the active feature's scope, and irreversible commands, are intercepted before they run;
+- the agent cannot stop with uncommitted changes and a red `init.sh` without being told to fix it or explain it.
+
+The last verification result is persisted and shown by `monday status`, because an agent's final message is not evidence.
+
+## What "model-agnostic" means here
+
+- The core (`core/method.md`, `core/roles/`, `core/monday.py`) never names a platform or a model. A test enforces this.
+- Roles are expressed as abstract tiers: explorer = fast, implementer = standard, reviewer = deep. Each adapter maps them to concrete models in one place.
+- Adapters only translate. Hooks call the same CLI, and the role agents are one-line pointers to the core role files, so there are no divergent copies of the rules.
+- Adding a platform means adding an `adapters/<name>/` folder and one entry in `ADAPTERS` in `core/monday.py`.
+
+## Integrations
+
+| | Claude Code (2.1.301) | Antigravity CLI `agy` (1.4.2) |
+|---|---|---|
+| Implemented | `CLAUDE.md` → `@AGENTS.md`, `SessionStart`/`PreToolUse`/`Stop` hooks, `monday-explorer`/`-implementer`/`-reviewer` agents with per-role model and tools | Native `AGENTS.md`, `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`), the same three agents in `.agents/agents/` |
+| Tested with real agents (headless) | Context loading, scope guard, stop hook, closure decided by verification (including a forced false "all checks pass" report), role agent loading | Same checks |
+| Not yet validated | The permission dialog in interactive sessions | Antigravity IDE (only the CLI was tested); per-agent model and tool restrictions |
+
+Platform differences that were measured, not assumed:
+
+- In `agy`, a `PreToolUse` hook answering `ask` is auto-approved in `accept-edits` mode, so Monday uses `deny` there.
+- `agy -p` always returns the model's last text with `status: SUCCESS`, even if a hook blocked it afterwards. Judge the outcome with `monday status` or `monday done`, never with the agent's message.
+
+## Getting started
+
+Requirements: Python 3 (standard library only; 3.8 or later should work, but only 3.14 has been tested), Bash and git. Git is strongly recommended: without it, scope and review checks need manual evidence.
 
 ```bash
-git clone <este repositorio> monday
-python3 monday/core/monday.py install /ruta/al/proyecto --dry-run     # ver qué haría
-python3 monday/core/monday.py install /ruta/al/proyecto               # ambas plataformas
-python3 monday/core/monday.py install /ruta/al/proyecto --platform claude   # solo una
+git clone https://github.com/Admes7a431-2408/Monday.git monday
+python3 monday/core/monday.py install /path/to/your/project --dry-run   # preview
+python3 monday/core/monday.py install /path/to/your/project             # Claude Code + Antigravity
+python3 monday/core/monday.py install /path/to/your/project --platform claude   # or a single platform
+cd /path/to/your/project
+./init.sh
 ```
 
-- **Nunca sobrescribe** archivos del proyecto: `AGENTS.md`, `CLAUDE.md` y la configuración de la plataforma se fusionan (se añade el bloque o los hooks de Monday y se conserva lo demás).
-- **Actualizar** = volver a ejecutar `install` desde una versión nueva de Monday. Si alguien editó un archivo gestionado en el proyecto, la actualización se detiene (o `--force`).
-- **Revertir:** cada instalación guarda un backup en `.monday/backups/`. `python3 .monday/monday.py rollback` deshace la última; `rollback --all` desinstala por completo. Los archivos que el proyecto modificó después de instalar (p. ej. `features.json` con trabajo) se conservan salvo `--force`.
+Then fill in the project map in `AGENTS.md` and your lint and test commands in `init.sh` (`QUICK_CHECKS`, `FULL_CHECKS`).
 
-Después de instalar: completa el mapa de `AGENTS.md`, configura `QUICK_CHECKS`/`FULL_CHECKS` en `init.sh` y ejecuta `./init.sh`.
+- **Installation never overwrites your files.** An existing `AGENTS.md`, `CLAUDE.md` or platform configuration is merged: Monday's block or hooks are added and everything else is kept.
+- **Updating** means running `install` again from a newer Monday checkout. If a managed file was edited inside the project, the update stops (or use `--force`).
+- **Rollback.** Every install keeps a backup in `.monday/backups/`. `python3 .monday/monday.py rollback` undoes the last one, and `rollback --all` uninstalls completely. Files you changed after installing are kept unless you pass `--force`.
 
-## Uso
+### Everyday use
 
 ```bash
 M="python3 .monday/monday.py"
-$M status                 # estado actual y siguiente paso (también lo inyecta el hook de inicio)
-$M check                  # integridad del harness (lo llama init.sh)
-$M start F-001            # empieza una feature y fija la base del diff
-$M verify F-001           # ejecuta los criterios: PASS / FAIL / UNAVAILABLE / manual
-$M scope F-001            # archivos cambiados frente al alcance
+$M status                 # current state, last verification result, next step
+$M start F-001            # start a feature; fixes the diff base and the contract fingerprint
+$M verify F-001           # run its criteria: PASS / FAIL / UNAVAILABLE / manual
+$M scope F-001            # changed files vs. the feature's scope
 $M review F-001 --verdict approve --by monday-reviewer
-$M done F-001             # cierra solo si todo lo anterior lo respalda
-$M amend F-001 --reason "…"   # cambio de risk/scope/criterios: queda en el historial
-$M block F-001 --reason "…"
-$M guard src/x.py         # ¿puedo escribir aquí sin pedir permiso? (alternativa sin hooks)
+$M done F-001             # close it, only if all the evidence supports it
+$M amend F-001 --reason "…"   # record a contract change (asks a human when hooks are active)
+$M block F-001 --reason "…"   # stop and escalate
+$M guard src/x.py         # may I write here? (manual fallback when hooks are unavailable)
 ```
 
-Una feature mínima:
+A minimal feature:
 
 ```json
 {
-  "id": "F-001", "title": "Arreglar el redondeo del total", "status": "pending", "risk": "medium",
+  "id": "F-001", "title": "Fix rounding of the invoice total", "status": "pending", "risk": "medium",
   "scope": ["src/billing/totals.py", "tests/billing/**"],
   "acceptance_criteria": [
-    {"id": "AC1", "text": "El caso reportado falla antes y pasa después", "verify": "pytest -q tests/billing/test_totals.py"},
-    {"id": "AC2", "text": "El texto de la factura se lee bien en el PDF"}
+    {"id": "AC1", "text": "The reported case fails before and passes after", "verify": "pytest -q tests/billing/test_totals.py"},
+    {"id": "AC2", "text": "The invoice text reads well in the PDF"}
   ]
 }
 ```
 
-`AC2` no tiene `verify`: es manual y `done` exigirá `--manual AC2="<evidencia>"`.
+`AC2` has no `verify` command, so it is manual: `done` will require `--manual AC2="<evidence>"`.
 
-## Compatibilidad
+## How Monday itself is verified
 
-Comprobada con agentes reales (`tests/e2e_adapters.sh`) en Claude Code 2.1.301 y Antigravity CLI 1.4.2: carga de `AGENTS.md`, inyección de estado, guarda de alcance, hook de parada y carga de los agentes por rol. Pendiente de validación manual: el diálogo de permiso en sesiones interactivas, Antigravity IDE y la restricción de herramientas por agente en Antigravity. Tabla completa en [`docs/architecture.md`](docs/architecture.md#compatibilidad-comprobada).
+| Kind | What | Command |
+|---|---|---|
+| Deterministic | 49 unit and scenario tests: the eight validation scenarios, install/update/rollback, design integrity, regressions | `./init.sh` |
+| Simulated | Hook behaviour with recorded platform payloads (part of the suite above) | `python3 -m unittest discover -s tests -v` |
+| Release checks | Contract integrity, secrets and private-data audit, version coherence, preserved history | `bash tests/release_check.sh` |
+| Clean-folder quick start | The commands in this README, from a fresh clone | `bash tests/quickstart.sh` |
+| Real agents | 16 checks on both platforms, including adversarial runs. Not deterministic; it spends tokens and needs logged-in CLIs | `bash tests/e2e_adapters.sh` |
 
-Otra plataforma (Codex, Cursor…) se añade con una carpeta en `adapters/` y una entrada en `ADAPTERS` de `core/monday.py`; el núcleo no cambia.
+Monday is developed with Monday: this repository has its own `AGENTS.md`, `features.json` and `progress/`, and its completed features were closed with `monday done`, rejections included (see `progress/history.md`).
 
-## Probar Monday desde cero
+## Known limitations
 
-```bash
-./init.sh                                   # harness de este repo + 49 pruebas (escenarios S1–S8, distribución, diseño, regresiones)
-bash tests/install_roundtrip.sh             # instalar → init.sh → reinstalar → rollback --all deja el directorio vacío
-bash tests/e2e_adapters.sh claude           # agentes reales (consume tokens; requiere sesión iniciada)
-bash tests/e2e_adapters.sh antigravity
-```
+- **The agent's final message is not controlled.** Platforms may show stale or false text as the result (verified in `agy -p`). Monday makes the real state visible (`status`, `history.md`) and refuses to close, but it cannot rewrite what the platform prints.
+- **Stop hook:**
+  - It blocks once per identical failure, to avoid loops.
+  - It does not run when a platform terminates on its own; for example, `agy` print mode ends the run when it soft-denies a tool.
+  - In Claude Code, if another `Stop` hook of yours blocks first, Monday only records the failure.
+- **`amend` guard:** the hooks ask for permission on `monday.py amend`, but not when it is invoked through a shell alias (`$M amend`). The change is still recorded and invalidates any review.
+- **`features.json` and `.monday/runtime/verification.json` are plain files.** Monday detects careless or shortcut edits (contract fingerprint, fresh re-verification in `done`). It does not stop a deliberate forgery.
+- **Shell commands that write files** are not analysed by the scope guard; they are caught by the scope check at `done`.
+- **Antigravity headless:** an agent can only run `./init.sh` if you add `command(./init.sh)` to `permissions.allow` in `~/.gemini/antigravity-cli/settings.json`. Monday does not change global settings.
+- **Out-of-scope writes in Antigravity are denied, not asked**, because `ask` is not reliable there. A human widens the scope or performs the action.
+- **Monorepos:** with Monday installed in a subdirectory, scope only sees that subdirectory. Files ignored by git do not count as changes.
+- **Platforms:** tested on Linux only. macOS should work (Bash + Python) but is untested; Windows is not supported.
+- **Language:** the operating instructions (the `AGENTS.md` block, `core/method.md`, roles) and the architecture records are written in Spanish, the author's working language.
 
-## Estructura del repositorio
+## Evolving and contributing
+
+The backlog lives in [`features.json`](features.json). Open items include a Codex CLI adapter, validation on the Antigravity IDE, and the `amend` alias guard.
+
+To contribute, work the Monday way:
+
+1. Describe the change as a feature with executable acceptance criteria.
+2. Keep `./init.sh` green.
+3. Close it with `monday done`.
+
+New rules are added only with evidence of a repeated problem; see `core/method.md` §8. Architecture decisions and their discarded alternatives are in [`docs/architecture.md`](docs/architecture.md). The original AgentForge audit is in [`progress/exploration_logs.md`](progress/exploration_logs.md). Issues and pull requests are welcome.
+
+## Repository layout
 
 ```text
-core/            núcleo agnóstico (se copia a <proyecto>/.monday/)
-  monday.py      CLI: estado, verificación, guardas, hooks, install/rollback
-  method.md      método: modos, ciclo, delegación, verificación, gobernanza, memoria
+core/            model-agnostic core (copied into <project>/.monday/)
+  monday.py      CLI: state, verification, guards, hooks, install/rollback
+  method.md      method: modes, task cycle, delegation, verification, governance, memory
   roles/         explorer · implementer · reviewer
-  policy.json    rutas protegidas y comandos que requieren permiso humano
-  templates/     semillas del proyecto
-adapters/        claude-code · antigravity (hooks + agentes-puntero)
-tests/           pruebas deterministas y validación e2e
-docs/            arquitectura y decisiones
+  policy.json    protected paths and commands that require human approval
+  templates/     project seeds
+adapters/        claude-code · antigravity
+tests/           deterministic tests, release checks, real-agent validation
+docs/            architecture and decisions
 ```
 
-Este repositorio usa Monday para sí mismo: `.monday` apunta a `core/` y su trabajo se registra en `features.json` y `progress/`.
+## Acknowledgements
 
-## Limitaciones conocidas
+- The design guide behind this version ([`Arquitectura Óptima de Arnés para Agentes IA.md`](Arquitectura%20Óptima%20de%20Arnés%20para%20Agentes%20IA.md), in Spanish) synthesises harness-engineering ideas presented by Benjamín Cordero and BettaTech.
+- AgentForge drew conceptual inspiration from [obra/superpowers](https://github.com/obra/superpowers), [mattpocock/skills](https://github.com/mattpocock/skills), [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills), [nobodyohm-web/claude-code-model-router](https://github.com/nobodyohm-web/claude-code-model-router), [BearGare/claude-skills](https://github.com/BearGare/claude-skills) and [shaaz1000/claude-router](https://github.com/shaaz1000/claude-router). Some of those ideas survive in Monday: evidence before claims, self-contained briefs, status protocol, and two-axis independent review.
 
-- Los hooks interceptan las herramientas de edición y los comandos de `policy.json`; un comando de shell que escribe archivos fuera de alcance no se detecta hasta `monday done`.
-- `features.json` es un archivo editable: Monday detecta incoherencias de forma, no la mala fe. El autor de una revisión (`--by`) es declarativo.
-- El texto final de un agente no es evidencia: `agy -p` puede devolver un texto anterior a un bloqueo con `status: SUCCESS`. Juzga el resultado con `monday status` (línea «Verificación») o `monday done`.
-- En Antigravity, lo fuera de alcance se **deniega** (no hay un «preguntar» fiable en modo `accept-edits`): el humano amplía el `scope` o ejecuta la acción.
-- En un monorepo con Monday en un subdirectorio, el alcance solo mira ese subdirectorio, y los archivos en `.gitignore` no cuentan como cambios.
-- Probado en Linux. macOS debería funcionar (Bash + Python); Windows no está soportado.
+Mentioning these projects is a technical acknowledgement. It does not imply sponsorship, endorsement or affiliation.
 
-## Licencia
+## License
 
 [MIT](LICENSE) © 2026 Admes.

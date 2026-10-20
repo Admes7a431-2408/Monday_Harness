@@ -53,6 +53,8 @@ Este proyecto usa el harness **Monday**: el repositorio es el sistema y la memor
 | `adapters/claude-code/` · `adapters/antigravity/` | Lo único específico de cada plataforma: hooks y agentes-puntero |
 | `tests/test_monday.py` | Escenarios S1–S8, distribución e integridad del diseño |
 | `tests/e2e_adapters.sh` | Validación con agentes reales (manual: requiere CLIs y sesión) |
+| `tests/release_check.sh` · `tests/quickstart.sh` | Comprobaciones previas a publicar y quick start del README desde carpeta limpia |
+| `README.md` · `CHANGELOG.md` | Presentación pública y notas de versión (en inglés) |
 | `docs/architecture.md` | Arquitectura, decisiones y reglas aprendidas |
 | `Arquitectura Óptima de Arnés para Agentes IA.md` | Guía normativa de referencia |
 

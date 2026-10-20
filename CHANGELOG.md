@@ -1,34 +1,57 @@
 # Changelog
 
-Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado semántico.
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); [semantic versioning](https://semver.org/).
 
-## [1.0.0] - 2026-10-18
+## [1.0.0] - 2026-10-19
 
-Primera versión definitiva de Monday. Reconstrucción completa: no comparte código con AgentForge `v0.1.0`/`v0.9.0`, que se conservan como testigos de la evolución del proyecto.
+First public version of Monday. It is a complete rebuild: Monday 1.0 shares no code with the AgentForge releases below. Their history is preserved in this repository through a merge that keeps it intact, without rewriting it.
 
-### Añadido
+### Added
 
-- Núcleo agnóstico (`core/`) que se instala como copia versionada en `<proyecto>/.monday/`, con manifiesto de hashes para detectar divergencias.
-- `AGENTS.md` como punto de entrada (<200 líneas) con bloque gestionado; método con tres modos (directo, registrado, orquestado) y riesgo low/medium/high.
-- Memoria del proyecto según la guía: `features.json` (contrato ejecutable), `progress/current.md`, `progress/exploration_logs.md`, `progress/history.md`, `docs/architecture.md`.
-- CLI `monday.py` (Python 3 stdlib): `status`, `check`, `start`, `verify`, `scope`, `review`, `done`, `amend`, `block`, `guard`, `hook`, `install`, `rollback`.
-- `monday done`: cierre solo con `init.sh`, criterios ejecutables, alcance contra git y revisión anclada al diff en verde; estados `PASS`/`FAIL`/`UNAVAILABLE`/`MANUAL`; rechazos registrados en el historial.
-- Roles explorador, implementador y revisor neutrales a la plataforma.
-- Adaptador Claude Code: `CLAUDE.md` → `@AGENTS.md`, hooks `SessionStart`/`PreToolUse`/`Stop`, agentes `monday-explorer|implementer|reviewer`.
-- Adaptador Antigravity: `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`) y agentes en `.agents/agents/`.
-- Instalación que fusiona en vez de sobrescribir, actualización que se detiene ante ediciones locales y `rollback` (`--all` para desinstalar).
-- `monday amend`: los cambios de contrato de una feature en curso quedan registrados e invalidan la revisión.
-- Estado de verificación persistido (`.monday/runtime/verification.json`): `status` y el inicio de sesión comunican ROJO/VERDE/DESACTUALIZADA/ninguna; terminar una sesión en rojo queda en el historial.
-- 49 pruebas deterministas (escenarios S1–S8, distribución, integridad del diseño, regresiones de la revisión independiente, estado de verificación), `tests/install_roundtrip.sh` y validación con agentes reales `tests/e2e_adapters.sh`.
+- **Model-agnostic core** (`core/`), installed into each project as a versioned copy in `.monday/` with a manifest of hashes that detects local edits to managed files.
+- **`AGENTS.md` entry point** (under 200 lines) with a managed block. The method has three modes (direct, tracked, orchestrated) and three risk levels.
+- **Project memory:**
+  - `features.json` is the executable contract: scope plus acceptance criteria with commands.
+  - `progress/current.md`, `progress/exploration_logs.md` and `progress/history.md` hold the work in progress, persistent findings and history.
+  - `docs/architecture.md` records conventions and decisions.
+- **`monday.py` CLI** (Python 3, standard library only): `status`, `check`, `start`, `verify`, `scope`, `review`, `done`, `amend`, `block`, `guard`, `hook`, `install`, `rollback`.
+- **`monday done`** closes a feature only when all of these pass: `init.sh` (`--full` for medium and high risk), every criterion, the scope check against the git diff, an independent review anchored to the reviewed diff (when required), and an unchanged contract fingerprint. Check results are `PASS`, `FAIL`, `UNAVAILABLE` or `MANUAL`, and rejections are recorded in the history.
+- **Persisted verification state.** `status` and the session-start hook report the last `init.sh` result (CLI output in Spanish: `ROJO`, `VERDE`, `DESACTUALIZADA` or `ninguna registrada`); missing evidence is never shown as success. A session that ends with a red `init.sh` is recorded in the history.
+- **Platform-neutral roles:** explorer, implementer and reviewer.
+- **Claude Code adapter:** `CLAUDE.md` → `@AGENTS.md`, `SessionStart`/`PreToolUse`/`Stop` hooks, and the `monday-explorer`, `monday-implementer` and `monday-reviewer` agents.
+- **Antigravity CLI adapter:** `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`) and the same agents in `.agents/agents/`.
+- **Install, update and rollback.** Install merges instead of overwriting, an update stops when managed files were edited locally, and `rollback` restores the previous state (`--all` uninstalls). Local runtime state is never distributed.
+- **Tests:**
+  - 49 deterministic tests: the eight validation scenarios, distribution, design integrity and regressions.
+  - Release checks (`tests/release_check.sh`) and a clean-folder quick start (`tests/quickstart.sh`).
+  - Real-agent validation (`tests/e2e_adapters.sh`): 16 checks, including a forced false success report.
 
-### Cambiado respecto a AgentForge
+### Changed from AgentForge
 
-- Contratos YAML + reportes autodeclarados → entradas de `features.json` cuyos criterios ejecuta `monday`.
-- Levels L0–L5 × tiers × gates G1–G8 → tres modos; el tier lo fija el rol y su modelo vive solo en el adaptador.
-- Skill global enlazada por symlink → copia por proyecto («el repositorio es el sistema»).
-- Sin hooks → tres hooks finos con la lógica en el CLI.
-- PyYAML → solo biblioteca estándar.
+- YAML contracts and self-reported results → `features.json` entries whose criteria Monday runs itself.
+- Levels L0–L5 × tiers × gates G1–G8 → three modes. The role sets the tier, and the concrete model lives only in the adapter.
+- Global skill linked with symlinks → a per-project copy ("the repository is the system").
+- No hooks → three thin hooks, with all logic in the CLI.
+- PyYAML → standard library only.
 
-### Eliminado
+### Removed
 
-- `routing/profiles.yaml` y posturas, `capabilities/catalog.yaml` y `cap status`, Interface Integrity Gate como mecanismo propio, `--purge-legacy`, `af.py` y la migración `.agentforge/`.
+- AgentForge's routing profiles and postures, the capability catalog and `cap status`, the Interface Integrity Gate as a separate mechanism, `--purge-legacy`, `af.py`, and the `.agentforge/` migration.
+
+### Known limitations
+
+See [README → Known limitations](README.md#known-limitations). In short:
+
+- the final message a platform shows is not controlled by Monday;
+- the stop hook has documented edge cases;
+- the `amend` guard does not see shell aliases;
+- `features.json` is an editable file;
+- tested on Linux only.
+
+## [0.9.0] - 2026-10-18 (AgentForge repository)
+
+First transition of AgentForge to the Monday name: the `monday.py` CLI, the `.monday/` project directory, `monday-*` subagents and a capability catalog. Preserved as tag `v0.9.0`.
+
+## [0.1.0] - 2026-10-07 (AgentForge)
+
+AgentForge's methodology, with routing L0–L5, quality gates, YAML contracts, the `af.py` tooling and the Claude Code and Antigravity adapters. Preserved as tag `v0.1.0`.
