@@ -43,3 +43,11 @@ Registro de cierres (`DONE`), rechazos, bloqueos y revisiones con su evidencia. 
 - Minor diferido (ronda 5): `stop_hook_active` también es true si bloqueó otro Stop hook del usuario; Monday entonces solo registra.
 - Requiere decisión humana: skills globales `monday` que aún enlazan a AgentForge (~/.claude/skills, ~/.gemini/config/skills); `command(./init.sh)` en la allowlist global de agy para que el agente pueda autoverificarse en headless.
 - Pendiente fuera de alcance: M-002 (Codex), M-003 (Antigravity IDE), validación interactiva del diálogo `ask` en Claude Code.
+
+## 2026-10-19 · M-005 · RECHAZADO
+- init.sh FAIL · AC1 PASS · AC2 FAIL · AC3 PASS · AC4 PASS · AC5 PASS · AC6 PASS · AC7 MANUAL · scope PASS · review PASS
+
+## 2026-10-19 · M-005 · CONTRATO MODIFICADO
+- Motivo: Corrección indispensable autorizada por el humano en la misión de release (§6 'correcciones indispensables'): AC2/AC4 falló porque agy ofreció edit_file/Path, que la guarda no conocía; se amplía el alcance a core/monday.py y adapters/antigravity/** solo para ese arreglo.
+- Ahora: risk high · scope README.md, CHANGELOG.md, docs/**, tests/**, AGENTS.md, core/templates/AGENTS.md, .gitignore, core/monday.py, adapters/antigravity/** · criterios AC1, AC2, AC3, AC4, AC5, AC6, AC7 (manual)
+- La revisión previa queda invalidada

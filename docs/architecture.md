@@ -45,7 +45,7 @@ Lectura obligatoria antes de cambiar Monday. Normativa: `Arquitectura Óptima de
 |---|---|---|
 | Carga de `AGENTS.md` | Vía `CLAUDE.md` → `@AGENTS.md` — e2e ✔ | Nativa — e2e ✔ |
 | Estado inyectado al iniciar sesión | `SessionStart` (stdout) — e2e ✔ | `SessionStart` (`injectSteps`) — e2e ✔ |
-| Guarda de alcance | `PreToolUse` → `ask` (pregunta en interactivo; deniega en headless) — e2e ✔ headless | `PreToolUse` → `deny` (`ask`/`force_ask` se autoaprueban en `accept-edits`) — e2e ✔ headless |
+| Guarda de alcance | `PreToolUse` → `ask` (pregunta en interactivo; deniega en headless) — e2e ✔ headless | `PreToolUse` (matcher `*`) → `deny` (`ask`/`force_ask` se autoaprueban en `accept-edits`); se guardan las rutas de los argumentos de toda herramienta que no sea de lectura, porque el catálogo cambia sin cambiar de versión (`edit_file`/`Path`) — e2e ✔ headless |
 | No terminar en rojo | `Stop` → `block` — e2e ✔ | `Stop` → `continue` — e2e ✔; la `response` de `agy -p` no es controlable (puede ser texto anterior al bloqueo) → el resultado se juzga con `monday status`/`done` (D-011) — e2e ✔ normal y adversarial |
 | Ejecutar `./init.sh` desde el agente en headless | Según permisos de la sesión | Solo con `command(./init.sh)` en la allowlist global de agy; sin ella, el modo print deniega y **termina** la ejecución (ni hooks ni `--mode auto` lo evitan) |
 | Agentes por rol | `.claude/agents/` con `model`/`tools` — e2e ✔ (`--agent`) | `.agents/agents/` — e2e ✔ (`--agent`); modelo y herramientas por agente **no verificados** (heredan la sesión) |
@@ -107,4 +107,4 @@ Contexto: Monday 1.0 se reconstruyó en un repositorio nuevo cuyo historial no c
 - El texto final de un agente nunca es evidencia de éxito, tampoco en las pruebas e2e: el criterio debe leer estado verificable (`status`, `done`, `init.sh`) — evidencia: AC4 rechazado en el cierre de M-001 (`progress/history.md`) y su causa raíz (`progress/exploration_logs.md`).
 
 - Los criterios que ejecutan Python en tests deben usar `python3 -B` o un `.gitignore` con `__pycache__/`: una caché `.pyc` del mismo segundo y tamaño ocultó un arreglo y apareció como cambio fuera de alcance — evidencia: primera ejecución de `tests/test_monday.py` (2026-10-18).
-- Nunca asumir la semántica de una respuesta de hook: comprobarla con el CLI real. `{}` deniega en agy y `ask` se autoaprueba en `accept-edits` — evidencia: `progress/exploration_logs.md` (2026-10-18).
+- Nunca asumir el contrato de una plataforma (semántica de respuestas de hook, nombres de herramientas o de argumentos): comprobarlo con el CLI real y diseñar la guarda para que falle cerrada ante lo desconocido. `{}` deniega en agy, `ask` se autoaprueba en `accept-edits` y el catálogo de herramientas cambió (`edit_file`/`Path`) sin cambiar de versión — evidencia: `progress/exploration_logs.md` (2026-10-18 y 2026-10-19), rechazo de `done` M-005 en `progress/history.md`. Segunda aparición del patrón: regla reforzada.

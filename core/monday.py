@@ -665,12 +665,30 @@ def cmd_guard(a):
 
 # ---------------------------------------------------------------- hooks de plataforma
 
-WRITE_TOOLS = {
-    "claude": {"Edit": "file_path", "Write": "file_path", "MultiEdit": "file_path", "NotebookEdit": "notebook_path"},
-    "antigravity": {"write_to_file": "TargetFile", "replace_file_content": "TargetFile",
-                    "multi_replace_file_content": "TargetFile"},
-}
+WRITE_TOOLS = {"claude": {"Edit": "file_path", "Write": "file_path", "MultiEdit": "file_path", "NotebookEdit": "notebook_path"}}
 SHELL_TOOLS = {"claude": ("Bash", "command"), "antigravity": ("run_command", "CommandLine")}
+# agy cambia su catálogo de herramientas sin cambiar de versión (visto: write_to_file/TargetFile y edit_file/Path).
+# No se enumeran las de escritura: toda herramienta que no sea de lectura se guarda sobre las rutas de sus argumentos.
+READ_ONLY_TOOL = re.compile(r"^(view_|read_|list_|search|grep|find|codebase_search|get_|trajectory_|knowledge_)")
+
+
+def paths_in_args(args):
+    """Rutas en los argumentos de una herramienta no reconocida: claves que terminan en path/file/dir/uri
+    (TargetFile, Path, AbsolutePath…) y cabeceras de parche (`*** Update File: x`). El contenido no se trata como ruta."""
+    found = []
+    def walk(key, value):
+        if isinstance(value, dict):
+            for k, v in value.items():
+                walk(k, v)
+        elif isinstance(value, list):
+            for v in value:
+                walk(key, v)
+        elif isinstance(value, str):
+            found.extend(re.findall(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", value, flags=re.M))
+            if re.search(r"(path|paths|file|files|dir|directory|uri)$", key, re.I) and "\n" not in value:
+                found.append(value.strip())
+    walk("", args)
+    return [re.sub(r"^file://", "", p) for p in found if p]
 
 
 def hook_root(platform, payload):
@@ -688,10 +706,13 @@ def hook_pre(platform, payload, root):
         call = payload.get("toolCall") or {}
         tool, args = call.get("name", ""), call.get("args") or {}
     reason = None
-    if tool in WRITE_TOOLS[platform] and args.get(WRITE_TOOLS[platform][tool]):
-        reason = guard_path(root, args[WRITE_TOOLS[platform][tool]])
-    elif tool == SHELL_TOOLS[platform][0] and args.get(SHELL_TOOLS[platform][1]):
+    if tool == SHELL_TOOLS[platform][0] and args.get(SHELL_TOOLS[platform][1]):
         reason = guard_command(args[SHELL_TOOLS[platform][1]])
+    elif platform == "claude":
+        if tool in WRITE_TOOLS["claude"] and args.get(WRITE_TOOLS["claude"][tool]):
+            reason = guard_path(root, args[WRITE_TOOLS["claude"][tool]])
+    elif not READ_ONLY_TOOL.match(tool):
+        reason = next((r for r in (guard_path(root, p) for p in paths_in_args(args)) if r), None)
     if not reason:
         return None                                       # sin salida = sin objeción
     reason = "Monday: " + reason

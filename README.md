@@ -89,6 +89,7 @@ The last verification result is persisted and shown by `monday status`, because 
 Platform differences that were measured, not assumed:
 
 - In `agy`, a `PreToolUse` hook answering `ask` is auto-approved in `accept-edits` mode, so Monday uses `deny` there.
+- `agy` changed its tool catalogue without changing its version: the same 1.4.2 offered `edit_file`/`Path` instead of `write_to_file`/`TargetFile`. The Antigravity guard therefore watches every non-read tool and checks the paths in its arguments, instead of relying on a list of tool names.
 - In our runs, `agy -p` returned the model's last text with `status: SUCCESS`, even when a hook had blocked it afterwards, and no hook could change that output. Judge the outcome with `monday status` or `monday done`, never with the agent's message.
 
 ## Getting started
@@ -144,7 +145,7 @@ A minimal feature:
 
 | Kind | What | Command |
 |---|---|---|
-| Deterministic | 49 unit and scenario tests: the eight validation scenarios, install/update/rollback, design integrity, regressions | `./init.sh` |
+| Deterministic | 50 unit and scenario tests: the eight validation scenarios, install/update/rollback, design integrity, regressions | `./init.sh` |
 | Simulated | Hook behaviour with hand-built payloads in the format observed on each platform (part of the suite above) | `python3 -m unittest discover -s tests -v` |
 | Release checks | Contract integrity, secrets and private-data audit, version coherence, preserved history | `bash tests/release_check.sh` |
 | Clean-folder quick start | The commands in this README, from a fresh clone | `bash tests/quickstart.sh` |
@@ -161,7 +162,7 @@ Monday is developed with Monday: this repository has its own `AGENTS.md`, `featu
   - In Claude Code, if another `Stop` hook of yours blocks first, Monday only records the failure.
 - **`amend` guard:** the hooks ask for permission on `monday.py amend`, but not when it is invoked through a shell alias (`$M amend`). The change is still recorded and invalidates any review.
 - **`features.json` and `.monday/runtime/verification.json` are plain files.** Monday detects careless or shortcut edits (contract fingerprint, fresh re-verification in `done`). It does not stop a deliberate forgery.
-- **Shell commands that write files** are not analysed by the scope guard; they are caught by the scope check at `done`.
+- **Shell commands that write files** are not analysed by the scope guard; they are caught by the scope check at `done`. The same applies to an Antigravity tool that writes without exposing the path in an argument whose name ends in `path`, `file`, `dir` or `uri`, or in a patch header.
 - **Antigravity headless:** an agent can only run `./init.sh` if you add `command(./init.sh)` to `permissions.allow` in `~/.gemini/antigravity-cli/settings.json`. Monday does not change global settings.
 - **Out-of-scope writes in Antigravity are denied, not asked**, because `ask` is not reliable there. A human widens the scope or performs the action.
 - **Monorepos:** with Monday installed in a subdirectory, scope only sees that subdirectory. Files ignored by git do not count as changes.

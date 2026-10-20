@@ -116,7 +116,9 @@
         "tests/**",
         "AGENTS.md",
         "core/templates/AGENTS.md",
-        ".gitignore"
+        ".gitignore",
+        "core/monday.py",
+        "adapters/antigravity/**"
       ],
       "acceptance_criteria": [
         {
@@ -157,15 +159,7 @@
       "started_at": "2026-10-19T22:32:56-04:00",
       "base": "44b9c72a0ebb7e4d13a636cb81e901dd76bc920a",
       "preexisting": {},
-      "contract": "e8baed173f738f5d39794e1d5b82a0fc2cc76d4a7f15bbf552e08eba5a162658",
-      "review": {
-        "verdict": "approve",
-        "by": "monday-reviewer",
-        "at": "2026-10-19T22:40:05-04:00",
-        "fingerprint": "20a07ce6a94de32f59aafac250c8e49b0fbce2ecb9a7fcae53d2b72a2bdbfd72",
-        "files": 6,
-        "notes": "44b9c72..a8bc7d4: merge -s ours correcto (árbol = 44b9c72; 2f3554d y tags v0.1.0/v0.9.0 son ancestros; push FF sobre 2f3554d). release_check, quickstart, 49 tests y scope en verde. Sin secretos ni rutas personales en el historial de primer padre. Minors: audit solo mira HEAD y el historial incluye .claude/scheduled_tasks.lock (b1735d9: sessionId/pid, inocuo, lo decide el humano); CHANGELOG 'shares no code' es inexacto (glob_re/matches vienen de AgentForge); README 'recorded platform payloads' (son payloads construidos) y 'always' en agy -p generalizan; ac4-contract no detecta cambios del contenido de e2e_adapters.sh; la URL de clone Monday.git requiere el renombrado."
-      }
+      "contract": "baca5514845ef025907c2c6f5289c879daec689faf066d495c93697e8d62e758"
     }
   ]
 }

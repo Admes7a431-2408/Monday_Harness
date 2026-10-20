@@ -19,10 +19,10 @@ First public version of Monday. It is a rebuild rather than an evolution of the 
 - **Persisted verification state.** `status` and the session-start hook report the last `init.sh` result (CLI output in Spanish: `ROJO`, `VERDE`, `DESACTUALIZADA` or `ninguna registrada`); missing evidence is never shown as success. A session that ends with a red `init.sh` is recorded in the history.
 - **Platform-neutral roles:** explorer, implementer and reviewer.
 - **Claude Code adapter:** `CLAUDE.md` → `@AGENTS.md`, `SessionStart`/`PreToolUse`/`Stop` hooks, and the `monday-explorer`, `monday-implementer` and `monday-reviewer` agents.
-- **Antigravity CLI adapter:** `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`) and the same agents in `.agents/agents/`.
+- **Antigravity CLI adapter:** `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`) and the same agents in `.agents/agents/`. The scope guard checks the paths in the arguments of any non-read tool, so it does not depend on `agy`'s changing tool names.
 - **Install, update and rollback.** Install merges instead of overwriting, an update stops when managed files were edited locally, and `rollback` restores the previous state (`--all` uninstalls). Local runtime state is never distributed.
 - **Tests:**
-  - 49 deterministic tests: the eight validation scenarios, distribution, design integrity and regressions.
+  - 50 deterministic tests: the eight validation scenarios, distribution, design integrity and regressions.
   - Release checks (`tests/release_check.sh`) and a clean-folder quick start (`tests/quickstart.sh`).
   - Real-agent validation (`tests/e2e_adapters.sh`): 16 checks, including a forced false success report.
 

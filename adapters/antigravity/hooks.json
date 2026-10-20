@@ -1,16 +1,30 @@
 {
   "monday": {
     "SessionStart": [
-      {"type": "command", "command": "python3 ../.monday/monday.py hook session-start --platform antigravity", "timeout": 30}
+      {
+        "type": "command",
+        "command": "python3 ../.monday/monday.py hook session-start --platform antigravity",
+        "timeout": 30
+      }
     ],
     "PreToolUse": [
       {
-        "matcher": "write_to_file|replace_file_content|multi_replace_file_content|run_command",
-        "hooks": [{"type": "command", "command": "python3 ../.monday/monday.py hook pre --platform antigravity", "timeout": 30}]
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ../.monday/monday.py hook pre --platform antigravity",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "Stop": [
-      {"type": "command", "command": "python3 ../.monday/monday.py hook stop --platform antigravity", "timeout": 900}
+      {
+        "type": "command",
+        "command": "python3 ../.monday/monday.py hook stop --platform antigravity",
+        "timeout": 900
+      }
     ]
   }
 }

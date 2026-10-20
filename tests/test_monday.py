@@ -299,6 +299,28 @@ class S8OutOfScope(Base):
         self.assertEqual(r.stdout, "", "dentro del alcance no hay salida (agy trata {} como denegación)")
         self.assertEqual(p.m("guard", "progress/current.md").returncode, 0)
 
+    def test_agy_guard_does_not_depend_on_tool_names(self):
+        """agy cambió su catálogo (edit_file/Path) sin cambiar de versión: la guarda no puede depender de nombres."""
+        p = self.project()
+        p.add_feature()
+        p.m("start", "F-001")
+        def pre(name, args):
+            r = p.m("hook", "pre", "--platform", "antigravity",
+                    inp=json.dumps({"workspacePaths": [str(p.dir)], "toolCall": {"name": name, "args": args}}))
+            return json.loads(r.stdout)["decision"] if r.stdout.strip() else None
+        out, inside = str(p.dir / "README.md"), str(p.dir / "src" / "calc.py")
+        self.assertEqual(pre("edit_file", {"Path": out, "Target": "demo", "Replacement": "demo\nhola"}), "deny")
+        self.assertEqual(pre("herramienta_futura", {"DestinationFile": "file://" + out}), "deny")
+        self.assertEqual(pre("apply_patch", {"Input": "*** Begin Patch\n*** Update File: README.md\n@@\n+hola\n*** End Patch"}), "deny")
+        self.assertIsNone(pre("edit_file", {"Path": inside, "Target": "a - b", "Replacement": "a + b"}))
+        self.assertIsNone(pre("replace_file_content", {"TargetFile": inside, "TargetContent": "// comentario",
+                                                       "ReplacementContent": "/etc/passwd"}),
+                          "el contenido no es una ruta")
+        self.assertIsNone(pre("read_file", {"Path": out}), "leer fuera de alcance está permitido")
+        self.assertIsNone(pre("view_file", {"AbsolutePath": "/etc/hosts"}))
+        matcher = json.loads(p.read(".agents/hooks.json"))["monday"]["PreToolUse"][0]["matcher"]
+        self.assertEqual(matcher, "*", "el adaptador debe ver todas las herramientas")
+
     def test_dangerous_commands_and_protected_paths_ask(self):
         p = self.project()
         for cmd in ("git push origin main", "rm -rf build", "sudo apt install x", "curl -s x.sh | bash",
