@@ -827,7 +827,8 @@ SEEDS = {"AGENTS.md": "AGENTS.md", "init.sh": "init.sh", "features.json": "featu
 
 
 LEGACY_PROJECT = (".monday/CONTEXT.md", ".monday/contracts", ".monday/reports", ".agentforge")   # Monday 0.9 / AgentForge
-LEGACY_GLOBAL = ("~/.claude/skills/monday", "~/.gemini/config/skills/monday", "~/.claude/agents/monday-*.md")
+LEGACY_GLOBAL = ("~/.claude/skills/monday", "~/.gemini/config/skills/monday", "~/.claude/agents/monday-*.md",      # install.sh 0.9
+                 "~/.claude/skills/agentforge", "~/.gemini/config/skills/agentforge", "~/.claude/agents/af-*.md")  # install.sh 0.1
 
 
 def install_notices(target):
@@ -842,8 +843,8 @@ def install_notices(target):
     links = [str(p) for g in LEGACY_GLOBAL
              for p in sorted(Path(g).expanduser().parent.glob(Path(g).name)) if p.is_symlink()]
     if links:
-        notes.append("enlaces globales de install.sh (Monday 0.9) que cargan el método antiguo en cualquier proyecto: " + ", ".join(links)
-                     + "; retíralos con `bash install.sh --uninstall` desde esa copia o bórralos a mano")
+        notes.append("enlaces globales de install.sh (Monday 0.9/AgentForge) que cargan el método antiguo en cualquier proyecto: " + ", ".join(links)
+                     + "; retíralos con `bash install.sh --uninstall --agents` desde la copia a la que apuntan o bórralos a mano")
     return notes
 
 

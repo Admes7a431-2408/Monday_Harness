@@ -493,6 +493,9 @@ class Distribution(Base):
         (d / "notas.txt").write_text("sin rastrear\n")
         (home / ".claude" / "skills").mkdir(parents=True)
         (home / ".claude" / "skills" / "monday").symlink_to(d)          # enlace global que dejaba install.sh 0.9
+        (home / ".claude" / "agents").mkdir()
+        (home / ".claude" / "agents" / "af-worker.md").symlink_to(d / "CLAUDE.md")   # y el de install.sh 0.1 (AgentForge)
+        (home / ".claude" / "agents" / "mine.md").write_text("agente propio\n")       # no es un enlace: sin aviso
         snapshot = lambda: {str(p.relative_to(d)): p.read_bytes() for p in d.rglob("*") if p.is_file() and ".git" not in p.relative_to(d).parts}
         before = snapshot()
         env = {"HOME": str(home)}
@@ -501,6 +504,9 @@ class Distribution(Base):
         self.assertIn("init.sh es del proyecto y no ejecuta", r.stdout)
         self.assertIn(".monday/CONTEXT.md, .monday/contracts", r.stdout)
         self.assertIn(".claude/skills/monday", r.stdout)
+        self.assertIn(".claude/agents/af-worker.md", r.stdout)
+        self.assertIn("install.sh --uninstall --agents", r.stdout)
+        self.assertNotIn("mine.md", r.stdout)
         for rel in ("init.sh", "src/app.py", "notas.txt", ".monday/CONTEXT.md", ".monday/contracts/X.yaml"):
             self.assertEqual((d / rel).read_bytes(), before[rel], rel)
         self.assertEqual(run([sys.executable, ".monday/monday.py", "check"], d).returncode, 0)
