@@ -228,10 +228,10 @@
       "review": {
         "verdict": "approve",
         "by": "monday-reviewer",
-        "at": "2026-10-20T21:56:19-04:00",
-        "fingerprint": "74b46de3a2f6eacc06226b282c68e99567391d675b058a23b85e611ab9d45ce9",
+        "at": "2026-10-20T22:54:08-04:00",
+        "fingerprint": "9ecd3db909b0a0d6dd3251f85ce7f64cde243d45b28f753f9cb06bfd2cd22677",
         "files": 6,
-        "notes": "Ronda 3 (0c62a1a): solo README.md:133, añade la pista readlink ~/.claude/skills/agentforge y la referencia al AVISO; corrige el minor de la ronda 2. Sin otros cambios. scope PASS (6 archivos). Se mantienen las comprobaciones de la ronda 2 sobre 8217c34."
+        "notes": "Ronda 4 (e039dbe): cmd_rollback hace rmtree de .monday/runtime y rmdir de .monday vacío solo si no es dry-run y no queda ningún backup. Comprobado: el test nuevo falla con el monday.py de d6e63a3 y pasa con e039dbe. --dry-run deja runtime intacto. Un rollback parcial (features.json conservado) mantiene backups y runtime. Si .monday/runtime es un symlink a un directorio externo, rmtree no lo sigue (el destino se conserva). runtime solo contiene estado de Monday (verification.json, stop-block.json, hooks.log). init.sh, 51 tests (incluido test_rollback_all_removes_runtime_state), release_check y scope PASS. Minor sin impacto: con runtime como symlink, .monday queda con el enlace."
       }
     }
   ]
