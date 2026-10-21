@@ -174,7 +174,7 @@
       "id": "M-006",
       "title": "Distribución pública de Monday 1.0.0 desde Monday_Harness: instalación en proyectos existentes, migración desde 0.9 y publicación verificada",
       "description": "El main remoto es v0.9 (install.sh con symlinks globales). Corregir instrucciones de instalación/verificación/desinstalación, avisos de instalación (init.sh propio sin monday check, restos de 0.9), quickstart contra la URL pública, y publicar con push fast-forward y tag v1.0.0 (autorizado por el usuario el 2026-10-20).",
-      "status": "in_progress",
+      "status": "done",
       "risk": "high",
       "scope": [
         "README.md",
@@ -232,7 +232,8 @@
         "fingerprint": "9ecd3db909b0a0d6dd3251f85ce7f64cde243d45b28f753f9cb06bfd2cd22677",
         "files": 6,
         "notes": "Ronda 4 (e039dbe): cmd_rollback hace rmtree de .monday/runtime y rmdir de .monday vacío solo si no es dry-run y no queda ningún backup. Comprobado: el test nuevo falla con el monday.py de d6e63a3 y pasa con e039dbe. --dry-run deja runtime intacto. Un rollback parcial (features.json conservado) mantiene backups y runtime. Si .monday/runtime es un symlink a un directorio externo, rmtree no lo sigue (el destino se conserva). runtime solo contiene estado de Monday (verification.json, stop-block.json, hooks.log). init.sh, 51 tests (incluido test_rollback_all_removes_runtime_state), release_check y scope PASS. Minor sin impacto: con runtime como symlink, .monday queda con el enlace."
-      }
+      },
+      "done_at": "2026-10-20T23:15:38-04:00"
     }
   ]
 }
