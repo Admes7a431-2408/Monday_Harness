@@ -226,12 +226,12 @@
       },
       "contract": "692ef760f330bcdd8fe697bf6da6e35105857cf8fd54752a9c25fb6dff4f9765",
       "review": {
-        "verdict": "changes_required",
+        "verdict": "approve",
         "by": "monday-reviewer",
-        "at": "2026-10-20T21:53:27-04:00",
-        "fingerprint": "94f23dd41d1a052cb5a47baee2a13ac83f9565a42f0cdc5d0beabab3c574506e",
+        "at": "2026-10-20T21:56:19-04:00",
+        "fingerprint": "74b46de3a2f6eacc06226b282c68e99567391d675b058a23b85e611ab9d45ce9",
         "files": 6,
-        "notes": "IMPORTANT: README.md:133 y core/monday.py install_notices recomiendan 'bash install.sh --uninstall' para retirar los enlaces globales de 0.9, pero install.sh 0.9 solo retira ~/.claude/agents/monday-*.md con '--uninstall --agents' (reproducido en HOME temporal: quedan monday-reviewer/scout/worker.md; scout/worker cargan el método antiguo en todo proyecto). MINOR: la sección 'Upgrading from Monday 0.9 or AgentForge' y LEGACY_GLOBAL no cubren los enlaces de AgentForge v0.1.0 (~/.claude/skills/agentforge, ~/.gemini/config/skills/agentforge, ~/.claude/agents/af-*.md). Resto OK: 51 tests, release_check, quickstart, scope PASS; avisos sin escrituras ni falsos positivos en instalación nueva; glob solo symlinks; rollback --all deja el proyecto intacto."
+        "notes": "Ronda 3 (0c62a1a): solo README.md:133, añade la pista readlink ~/.claude/skills/agentforge y la referencia al AVISO; corrige el minor de la ronda 2. Sin otros cambios. scope PASS (6 archivos). Se mantienen las comprobaciones de la ronda 2 sobre 8217c34."
       }
     }
   ]
