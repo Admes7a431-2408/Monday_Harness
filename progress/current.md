@@ -20,9 +20,13 @@ Feature: M-006 — distribución pública desde Monday_Harness (modo orquestado,
 - Pasos 2–4 hechos: `install_notices` + test `Distribution` (51 OK); README «Getting started» reescrito; D-013; quickstart local PASS; release_check 7/7 PASS.
 - Ensayo con agentes reales en proyecto existente (AGENTS.md propio, cambio sin commitear, archivo sin rastrear), desde core local: claude (haiku) y agy 1.4.3 recitan protocolo y regla propia; `rm -rf` → ask (claude), `.monday/policy.json` → ask (claude) / deny (agy), archivos intactos (sha256); rollback --all deja solo los cambios del usuario.
 - Quickstart contra el main publicado actual (2f3554d) falla: no existe core/monday.py (esperado, D1).
-- Pendiente: e2e completo (en curso), revisión independiente, commit, push, quickstart remoto, done, tag.
+- e2e 16/16 PASS (claude 2.1.301, agy 1.4.3). Revisión independiente: ronda 1 changes_required (install.sh 0.9 necesita `--uninstall --agents`; faltaba AgentForge 0.1) → corregido y reproducido con los install.sh reales en HOME temporal; rondas 2–3 approve.
+- Verificación final sobre 0c62a1a (2026-10-20): init.sh, release_check 7/7, quickstart, unittest 51 OK, init.sh --full (e2e) — todo PASS.
+- Pendiente tras desbloquear: `git push origin main` (fast-forward desde 2f3554d) → `bash tests/quickstart.sh https://github.com/Admes7a431-2408/Monday_Harness.git main` → `monday done M-006 --manual AC6=… --manual AC7=…` → commit de cierre → push → `git tag -a v1.0.0` en ese commit → `git push origin v1.0.0` → quickstart con `v1.0.0` desde la URL pública.
 
 ## Bloqueos y errores
+
+- 2026-10-20: `git push origin main` falla: «could not read Username for 'https://github.com'». Sin credential helper, sin clave SSH aceptada (`Permission denied (publickey)`), sin `gh`. El push vía GitKraken falla igual. Configurar credenciales es puerta humana (secretos). Nada publicado: el remoto sigue en 2f3554d.
 
 ## Resumen para el historial
 
