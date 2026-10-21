@@ -1033,8 +1033,9 @@ def cmd_rollback(a):
     if not a.dry_run and broot.is_dir() and not any(broot.iterdir()):
         broot.rmdir()
         mon = target / ".monday"
-        if mon.is_dir() and {p.name for p in mon.iterdir()} <= {"runtime"}:
-            shutil.rmtree(mon)                            # solo quedaba estado efímero (hooks.log, marcadores)
+        shutil.rmtree(mon / "runtime", ignore_errors=True)   # estado efímero de Monday (hooks.log, marcadores), aunque queden restos de 0.9
+        if mon.is_dir() and not any(mon.iterdir()):
+            mon.rmdir()
     return 0
 
 

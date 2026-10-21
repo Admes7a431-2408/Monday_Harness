@@ -511,6 +511,8 @@ class Distribution(Base):
             self.assertEqual((d / rel).read_bytes(), before[rel], rel)
         self.assertEqual(run([sys.executable, ".monday/monday.py", "check"], d).returncode, 0)
         self.assertIn("sin cambios", run([sys.executable, str(SRC_CLI), "install", "."], d, env=env).stdout)
+        (d / ".monday" / "runtime").mkdir(exist_ok=True)                   # lo que dejan las sesiones con hooks
+        (d / ".monday" / "runtime" / "hooks.log").write_text("{}\n")
         r = run([sys.executable, ".monday/monday.py", "rollback", ".", "--all"], d)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(snapshot(), before)
