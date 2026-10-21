@@ -8,8 +8,8 @@ checks=("$@"); [[ ${#checks[@]} -eq 0 ]] && checks=(ac4-contract audit version h
 failed=0
 result() { echo "$1: $2"; [[ $1 == FAIL ]] && failed=1; return 0; }
 
-# Estado publicado de AgentForge observado con `git ls-remote` (2026-10-19). Si estos ids cambian, se reescribió historia.
-AGENTFORGE_MAIN=2f3554d19d4d0d23360f4ece5266020aa410a95b
+# Estado publicado del repositorio predecesor observado con `git ls-remote` (2026-10-19). Si estos ids cambian, se reescribió historia.
+PREDECESSOR_MAIN=2f3554d19d4d0d23360f4ece5266020aa410a95b
 declare -A TAGS=([v0.1.0]=0a49df03df1e0907d47d8a3bd9419e4f125dbbee [v0.9.0]=f9ccc0cd8266499678f16a3444d0ee56a338f855)
 
 for check in "${checks[@]}"; do
@@ -49,10 +49,10 @@ EOF
 
   history)
     ok=1
-    git merge-base --is-ancestor "$AGENTFORGE_MAIN" HEAD 2>/dev/null || ok=0
+    git merge-base --is-ancestor "$PREDECESSOR_MAIN" HEAD 2>/dev/null || ok=0
     for t in "${!TAGS[@]}"; do [[ $(git rev-parse -q --verify "refs/tags/$t" 2>/dev/null) == "${TAGS[$t]}" ]] || ok=0; done
-    [[ $ok -eq 1 ]] && result PASS "history: AgentForge main y los tags v0.1.0/v0.9.0 se conservan sin reescritura (push fast-forward)" \
-                    || result FAIL "history: falta AgentForge main como ancestro o los tags difieren de los publicados" ;;
+    [[ $ok -eq 1 ]] && result PASS "history: el main predecesor y los tags v0.1.0/v0.9.0 se conservan sin reescritura (push fast-forward)" \
+                    || result FAIL "history: falta el main predecesor como ancestro o los tags difieren de los publicados" ;;
 
   *) result FAIL "comprobación desconocida: $check" ;;
   esac

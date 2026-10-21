@@ -475,6 +475,40 @@ class Distribution(Base):
         self.assertFalse((d / ".monday").exists())
         self.assertFalse((d / "features.json").exists())
 
+    def test_existing_dirty_project_with_legacy_residue_is_restored_byte_for_byte(self):
+        d = Path(tempfile.mkdtemp(prefix="monday-test-"))
+        home = Path(tempfile.mkdtemp(prefix="monday-home-"))
+        self.addCleanup(shutil.rmtree, d, True)
+        self.addCleanup(shutil.rmtree, home, True)
+        files = {"AGENTS.md": "# App\n\nNotas propias.\n", "CLAUDE.md": "Usa tabs.\n", "src/app.py": "print(1)\n",
+                 ".claude/settings.json": json.dumps({"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "echo mio"}]}]}}),
+                 "init.sh": "#!/bin/sh\necho checks propios\n", ".monday/CONTEXT.md": "contexto 0.9\n",
+                 ".monday/contracts/X.yaml": "id: X\n"}
+        for rel, text in files.items():
+            (d / rel).parent.mkdir(parents=True, exist_ok=True)
+            (d / rel).write_text(text)
+        (d / "init.sh").chmod(0o755)
+        run(["git", "init", "-q"], d); run(["git", "add", "-A"], d); run(["git", "commit", "-qm", "init"], d)
+        (d / "src" / "app.py").write_text("print(2)  # sin commitear\n")
+        (d / "notas.txt").write_text("sin rastrear\n")
+        (home / ".claude" / "skills").mkdir(parents=True)
+        (home / ".claude" / "skills" / "monday").symlink_to(d)          # enlace global que dejaba install.sh 0.9
+        snapshot = lambda: {str(p.relative_to(d)): p.read_bytes() for p in d.rglob("*") if p.is_file() and ".git" not in p.relative_to(d).parts}
+        before = snapshot()
+        env = {"HOME": str(home)}
+        r = run([sys.executable, str(SRC_CLI), "install", "."], d, env=env)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("init.sh es del proyecto y no ejecuta", r.stdout)
+        self.assertIn(".monday/CONTEXT.md, .monday/contracts", r.stdout)
+        self.assertIn(".claude/skills/monday", r.stdout)
+        for rel in ("init.sh", "src/app.py", "notas.txt", ".monday/CONTEXT.md", ".monday/contracts/X.yaml"):
+            self.assertEqual((d / rel).read_bytes(), before[rel], rel)
+        self.assertEqual(run([sys.executable, ".monday/monday.py", "check"], d).returncode, 0)
+        self.assertIn("sin cambios", run([sys.executable, str(SRC_CLI), "install", "."], d, env=env).stdout)
+        r = run([sys.executable, ".monday/monday.py", "rollback", ".", "--all"], d)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(snapshot(), before)
+
     def test_rollback_keeps_project_data_created_after_install(self):
         p = self.project()
         p.add_feature()

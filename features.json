@@ -169,6 +169,62 @@
         "notes": "60cc003..e491f3f: la exención de artefactos se anula si el directorio es la raíz o la contiene; con '/' no exime nada. 'name' sale de las claves ambiguas. 50 OK, scope PASS. Residual minor: un artifactDirectoryPath dentro del proyecto seguiría eximiendo ese subárbol."
       },
       "done_at": "2026-10-19T23:13:14-04:00"
+    },
+    {
+      "id": "M-006",
+      "title": "Distribución pública de Monday 1.0.0 desde Monday_Harness: instalación en proyectos existentes, migración desde 0.9 y publicación verificada",
+      "description": "El main remoto es v0.9 (install.sh con symlinks globales). Corregir instrucciones de instalación/verificación/desinstalación, avisos de instalación (init.sh propio sin monday check, restos de 0.9), quickstart contra la URL pública, y publicar con push fast-forward y tag v1.0.0 (autorizado por el usuario el 2026-10-20).",
+      "status": "in_progress",
+      "risk": "high",
+      "scope": [
+        "README.md",
+        "CHANGELOG.md",
+        "core/monday.py",
+        "tests/**",
+        "docs/**"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "La batería determinista pasa",
+          "verify": "python3 -m unittest discover -s tests -q"
+        },
+        {
+          "id": "AC2",
+          "text": "Comprobaciones de release (contrato AC4 de M-001, auditoría, versión, historia preservada)",
+          "verify": "bash tests/release_check.sh"
+        },
+        {
+          "id": "AC3",
+          "text": "Las instrucciones del README funcionan desde un clon limpio del repositorio local",
+          "verify": "bash tests/quickstart.sh"
+        },
+        {
+          "id": "AC4",
+          "text": "Instalar en un proyecto existente con archivos propios, cambios sin commitear y restos de 0.9 los preserva, avisa de lo que no gestiona y rollback --all lo deja byte a byte como estaba",
+          "verify": "python3 -m unittest tests.test_monday.Distribution -q"
+        },
+        {
+          "id": "AC5",
+          "text": "Adaptadores validados con agentes reales (claude -p y agy -p)",
+          "verify": "bash tests/e2e_adapters.sh"
+        },
+        {
+          "id": "AC6",
+          "text": "Publicado en https://github.com/Admes7a431-2408/Monday_Harness.git por push fast-forward y el quick start pasa clonando desde esa URL pública"
+        },
+        {
+          "id": "AC7",
+          "text": "README documenta requisitos, instalación con y sin agente, comprobación, actualización, desinstalación, migración desde 0.9 y diferencias entre plataformas, con rutas y comandos reales"
+        }
+      ],
+      "started_at": "2026-10-20T21:42:01-04:00",
+      "base": "413b873ffca380fd8c3d5a291a044229420f740b",
+      "preexisting": {
+        "README.md": "7da9942b8558ceda7732953ae53b379ba6ff6202e275abbea13b62d178455764",
+        "tests/release_check.sh": "1208a29bec51b2729d6c11c8836b889c8072f1c3ed956cf01cd13482ac25a1be"
+      },
+      "contract": "692ef760f330bcdd8fe697bf6da6e35105857cf8fd54752a9c25fb6dff4f9765"
     }
   ]
 }

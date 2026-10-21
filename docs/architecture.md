@@ -41,7 +41,7 @@ Lectura obligatoria antes de cambiar Monday. Normativa: `Arquitectura Óptima de
 
 ## Compatibilidad comprobada
 
-| Capacidad | Claude Code 2.1.301 | Antigravity CLI 1.4.2 |
+| Capacidad | Claude Code 2.1.301 | Antigravity CLI 1.4.2 y 1.4.3 (e2e 16/16, 2026-10-20) |
 |---|---|---|
 | Carga de `AGENTS.md` | Vía `CLAUDE.md` → `@AGENTS.md` — e2e ✔ | Nativa — e2e ✔ |
 | Estado inyectado al iniciar sesión | `SessionStart` (stdout) — e2e ✔ | `SessionStart` (`injectSteps`) — e2e ✔ |
@@ -100,6 +100,10 @@ Contexto: en AC4, un agente de Antigravity bloqueado por el hook `Stop` terminó
 ### D-012 — Historial de AgentForge unido sin reescritura; documentación pública en inglés (2026-10-19)
 
 Contexto: Monday 1.0 se reconstruyó en un repositorio nuevo cuyo historial no compartía ancestro con el de AgentForge publicado (`main` 2f3554d, tags `v0.1.0`/`v0.9.0`, dos releases en GitHub). Publicarlo en ese repositorio habría exigido un push forzado. Decisión: merge `-s ours --allow-unrelated-histories` de AgentForge `main` (traído desde la copia local, sin red): el árbol sigue siendo el de Monday, AgentForge queda como ancestro con sus tags intactos y el push futuro es fast-forward. README y CHANGELOG pasan a inglés para la difusión; las instrucciones operativas (bloque de `AGENTS.md`, `core/method.md`, roles) y este documento siguen en español, el idioma de trabajo de su consumidor. Alternativas descartadas: push forzado (destruye el historial publicado); repositorio nuevo sin historial (rompe la continuidad y las redirecciones de GitHub); traducir las instrucciones operativas (duplicaría reglas en dos idiomas). Consecuencias: `tests/release_check.sh history` comprueba que la historia publicada sigue siendo ancestro.
+
+### D-013 — Instalar en proyectos existentes: avisar de lo no gestionado, no migrarlo (2026-10-20)
+
+Contexto: el `main` publicado seguía siendo 0.9, cuyo `install.sh` enlazaba una skill global, y sus proyectos tienen `.monday/CONTEXT.md`, `contracts/` y `reports/`. Además, un proyecto con `init.sh` propio no ejecuta `monday check`, así que `./init.sh` en verde no validaba el harness. Decisión: `install` imprime `AVISO:` para el `init.sh` propio sin `monday check`, los restos de 0.9/AgentForge del proyecto y los enlaces globales de `install.sh` (`~/.claude/skills/monday`, `~/.gemini/config/skills/monday`, `~/.claude/agents/monday-*.md`). Los lee y nunca los modifica. El README documenta la migración y cómo pedir la instalación a un agente desde la URL pública, con el clon fuera del proyecto y fijado al tag. `tests/quickstart.sh [url [ref]]` reproduce el README contra la URL publicada. Alternativas descartadas: migración automática o reconstruir `--purge-legacy` (retirado en 1.0, ver CHANGELOG; borrar fuera del proyecto es una puerta humana); insertar la línea en el `init.sh` del usuario (es un archivo del proyecto). Consecuencias: la migración es manual pero visible, y `rollback --all` sigue dejando el proyecto byte a byte como estaba.
 
 ## Reglas aprendidas
 

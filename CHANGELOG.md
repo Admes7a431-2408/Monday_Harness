@@ -2,7 +2,7 @@
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); [semantic versioning](https://semver.org/).
 
-## [1.0.0] - 2026-10-19
+## [1.0.0] - 2026-10-20
 
 First public version of Monday. It is a rebuild rather than an evolution of the AgentForge codebase below; only a few small helpers (such as the glob matcher used for scope) closely mirror AgentForge's. Their history is preserved in this repository through a merge that keeps it intact, without rewriting it.
 
@@ -21,9 +21,10 @@ First public version of Monday. It is a rebuild rather than an evolution of the 
 - **Claude Code adapter:** `CLAUDE.md` → `@AGENTS.md`, `SessionStart`/`PreToolUse`/`Stop` hooks, and the `monday-explorer`, `monday-implementer` and `monday-reviewer` agents.
 - **Antigravity CLI adapter:** `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`) and the same agents in `.agents/agents/`. The scope guard checks the paths in the arguments of any non-read tool, so it does not depend on `agy`'s changing tool names.
 - **Install, update and rollback.** Install merges instead of overwriting, an update stops when managed files were edited locally, and `rollback` restores the previous state (`--all` uninstalls). Local runtime state is never distributed.
+- **Installing into existing projects.** Install prints notices (`AVISO:`) for what it does not manage: an `init.sh` of the project's own that does not run `monday check`, Monday 0.9 / AgentForge leftovers in the project, and the global links of the 0.9 `install.sh`. It never modifies them. The README documents how to check, uninstall and upgrade from 0.9, and how to ask an agent to install Monday from the public repository.
 - **Tests:**
-  - 50 deterministic tests: the eight validation scenarios, distribution, design integrity and regressions.
-  - Release checks (`tests/release_check.sh`) and a clean-folder quick start (`tests/quickstart.sh`).
+  - 51 deterministic tests: the eight validation scenarios, distribution, design integrity and regressions.
+  - Release checks (`tests/release_check.sh`) and a clean-folder quick start (`tests/quickstart.sh [url [ref]]`, also run against the public repository).
   - Real-agent validation (`tests/e2e_adapters.sh`): 16 checks, including a forced false success report.
 
 ### Changed from AgentForge

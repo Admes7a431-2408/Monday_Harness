@@ -10,7 +10,7 @@ Monday is my first attempt at building a modular workflow that makes working wit
 
 Monday started as **AgentForge**, a personal project born from a simple concern: I wanted to trust the work of my AI agents more, and I wanted the same workflow regardless of which model I was using that day.
 
-AgentForge explored contracts, quality gates, scope control and model routing. Its two releases are preserved as witnesses of that evolution: [`v0.1.0`](https://github.com/Admes7a431-2408/AgentForge/releases/tag/v0.1.0) (AgentForge) and [`v0.9.0`](https://github.com/Admes7a431-2408/AgentForge/releases/tag/v0.9.0) (first transition to the Monday name). Monday 1.0 keeps that intention but rebuilds it with fewer moving parts. The project's memory lives in the repository instead of the chat, contracts are executable, and the guarantees that matter are enforced by a CLI or a hook rather than by the model's goodwill. The Git history keeps both stages.
+AgentForge explored contracts, quality gates, scope control and model routing. Its two releases are preserved as witnesses of that evolution: [`v0.1.0`](https://github.com/Admes7a431-2408/Monday_Harness/releases/tag/v0.1.0) (AgentForge) and [`v0.9.0`](https://github.com/Admes7a431-2408/Monday_Harness/releases/tag/v0.9.0) (first transition to the Monday name). Monday 1.0 keeps that intention but rebuilds it with fewer moving parts. The project's memory lives in the repository instead of the chat, contracts are executable, and the guarantees that matter are enforced by a CLI or a hook rather than by the model's goodwill. The Git history keeps both stages.
 
 This version is what I learned along the way. It is a starting point, not the final form of the idea.
 
@@ -80,7 +80,7 @@ The last verification result is persisted and shown by `monday status`, because 
 
 ## Integrations
 
-| | Claude Code (2.1.301) | Antigravity CLI `agy` (1.4.2) |
+| | Claude Code (2.1.301) | Antigravity CLI `agy` (1.4.2, 1.4.3) |
 |---|---|---|
 | Implemented | `CLAUDE.md` → `@AGENTS.md`, `SessionStart`/`PreToolUse`/`Stop` hooks, `monday-explorer`/`-implementer`/`-reviewer` agents with per-role model and tools | Native `AGENTS.md`, `.agents/hooks.json` (`SessionStart`/`PreToolUse`/`Stop`), the same three agents in `.agents/agents/` |
 | Tested with real agents (headless) | Context loading, scope guard, stop hook, closure decided by verification (including a forced false "all checks pass" report), role agent loading | Same checks |
@@ -94,22 +94,45 @@ Platform differences that were measured, not assumed:
 
 ## Getting started
 
-Requirements: Python 3 (standard library only; 3.8 or later should work, but only 3.14 has been tested), Bash and git. Git is strongly recommended: without it, scope and review checks need manual evidence.
+Requirements: Python 3 (standard library only; 3.8 or later should work, but only 3.14 has been tested), Bash and git. Git is strongly recommended: without it, scope and review checks need manual evidence. To use the adapters you need Claude Code and/or the Antigravity CLI (`agy`); Monday itself does not need either.
+
+Clone Monday **outside** your project (it is only the installer's source; the project gets its own copy in `.monday/`):
 
 ```bash
-git clone https://github.com/Admes7a431-2408/Monday.git monday
-python3 monday/core/monday.py install /path/to/your/project --dry-run   # preview
-python3 monday/core/monday.py install /path/to/your/project             # Claude Code + Antigravity
-python3 monday/core/monday.py install /path/to/your/project --platform claude   # or a single platform
+tmp="$(mktemp -d)"
+git clone --depth 1 --branch v1.0.0 https://github.com/Admes7a431-2408/Monday_Harness.git "$tmp/monday"
+python3 "$tmp/monday/core/monday.py" install /path/to/your/project --dry-run   # preview: lists every file it would create or merge
+python3 "$tmp/monday/core/monday.py" install /path/to/your/project             # Claude Code + Antigravity
+python3 "$tmp/monday/core/monday.py" install /path/to/your/project --platform claude   # or one platform: claude | antigravity
 cd /path/to/your/project
-./init.sh
+./init.sh                             # project checks + harness integrity
+python3 .monday/monday.py check       # harness integrity only: managed files, hooks, features.json
+python3 .monday/monday.py status      # version, features, last verification
 ```
 
-Then fill in the project map in `AGENTS.md` and your lint and test commands in `init.sh` (`QUICK_CHECKS`, `FULL_CHECKS`).
+Then fill in the project map in `AGENTS.md` and your lint and test commands in `init.sh` (`QUICK_CHECKS`, `FULL_CHECKS`), commit the result, and start a new agent session so the platform loads `AGENTS.md` and the hooks. The clone in `$tmp` can be deleted.
 
-- **Installation never overwrites your files.** An existing `AGENTS.md`, `CLAUDE.md` or platform configuration is merged: Monday's block or hooks are added and everything else is kept.
+- **Installation never overwrites your files.** An existing `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json` or `.agents/hooks.json` is merged: Monday's block or hooks are added and everything else is kept. An existing `init.sh`, `features.json`, `docs/architecture.md` or `progress/*` file is left untouched. Uncommitted changes are not affected: install only writes the files it lists.
+- **Notices.** Install prints `AVISO:` lines for things it does not manage. Examples: an `init.sh` of your own that does not run `python3 .monday/monday.py check` (add that line, or `./init.sh` will not validate the harness), and Monday 0.9 leftovers (see below).
+- **Idempotent.** Running the same install again reports `sin cambios` ("no changes").
 - **Updating** means running `install` again from a newer Monday checkout. If a managed file was edited inside the project, the update stops (or use `--force`).
-- **Rollback.** Every install keeps a backup in `.monday/backups/`. `python3 .monday/monday.py rollback` undoes the last one, and `rollback --all` uninstalls completely. Files you changed after installing are kept unless you pass `--force`.
+- **Uninstalling.** Every install keeps a backup in `.monday/backups/`. `python3 .monday/monday.py rollback` undoes the last install or update, and `python3 .monday/monday.py rollback --all` uninstalls Monday completely: created files are removed and merged files are restored to their original bytes. Files you changed after installing (for example your `features.json` or `progress/history.md`) are kept unless you pass `--force`. Add `--dry-run` to preview.
+
+### Asking an agent to install it
+
+In the target project, give Claude Code or Antigravity an instruction like this:
+
+> Install Monday in this project from https://github.com/Admes7a431-2408/Monday_Harness following its README ("Getting started"). Clone it into a temporary directory outside this project, run the install with `--dry-run` first and show me the plan, then install, run `./init.sh` and `python3 .monday/monday.py check`, and report every `AVISO:` line. Do not commit.
+
+The agent needs permission to run `git clone` and `python3`. After installing, start a new session: the instructions and hooks are loaded when a session starts.
+
+### Upgrading from Monday 0.9 or AgentForge
+
+Monday 0.9 (tag `v0.9.0`) used a different mechanism: `install.sh` linked a global skill into `~/.claude/skills/monday` and `~/.gemini/config/skills/monday` (and, with `--agents`, `~/.claude/agents/monday-*.md`), and projects had `.monday/CONTEXT.md`, `.monday/contracts/` and `.monday/reports/`. Monday 1.0 does not use any of them.
+
+1. Remove the global links, which would otherwise load the old method in every project: `bash install.sh --uninstall` from the 0.9 checkout those links point to (`readlink ~/.claude/skills/monday`), because it only removes links to its own directory. Alternatively, delete those symlinks by hand.
+2. Install 1.0 as above. Install warns about the old project files and global links it finds, and never modifies them.
+3. Move what is still useful into `features.json` and `progress/`, then delete the old files yourself.
 
 ### Everyday use
 
@@ -145,10 +168,10 @@ A minimal feature:
 
 | Kind | What | Command |
 |---|---|---|
-| Deterministic | 50 unit and scenario tests: the eight validation scenarios, install/update/rollback, design integrity, regressions | `./init.sh` |
+| Deterministic | 51 unit and scenario tests: the eight validation scenarios, install/update/rollback, design integrity, regressions | `./init.sh` |
 | Simulated | Hook behaviour with hand-built payloads in the format observed on each platform (part of the suite above) | `python3 -m unittest discover -s tests -v` |
 | Release checks | Contract integrity, secrets and private-data audit, version coherence, preserved history | `bash tests/release_check.sh` |
-| Clean-folder quick start | The commands in this README, from a fresh clone | `bash tests/quickstart.sh` |
+| Clean-folder quick start | The commands in this README, from a fresh clone of the local repository or of a published URL and tag | `bash tests/quickstart.sh` · `bash tests/quickstart.sh https://github.com/Admes7a431-2408/Monday_Harness.git v1.0.0` |
 | Real agents | 16 checks on both platforms, including adversarial runs. Not deterministic; it spends tokens and needs logged-in CLIs | `bash tests/e2e_adapters.sh` |
 
 Monday is developed with Monday: this repository has its own `AGENTS.md`, `features.json` and `progress/`, and its completed features were closed with `monday done`, rejections included (see `progress/history.md`).

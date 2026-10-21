@@ -826,6 +826,27 @@ SEEDS = {"AGENTS.md": "AGENTS.md", "init.sh": "init.sh", "features.json": "featu
          "progress/exploration_logs.md": "exploration_logs.md", "progress/history.md": "history.md"}
 
 
+LEGACY_PROJECT = (".monday/CONTEXT.md", ".monday/contracts", ".monday/reports", ".agentforge")   # Monday 0.9 / AgentForge
+LEGACY_GLOBAL = ("~/.claude/skills/monday", "~/.gemini/config/skills/monday", "~/.claude/agents/monday-*.md")
+
+
+def install_notices(target):
+    """Lo que install no gestiona pero conviene revisar. Solo informa: nunca lo modifica."""
+    notes = []
+    init = target / "init.sh"
+    if init.is_file() and ".monday/monday.py check" not in init.read_text(errors="replace"):
+        notes.append("init.sh es del proyecto y no ejecuta `python3 .monday/monday.py check`; añádelo para que ./init.sh valide también el harness")
+    old = [rel for rel in LEGACY_PROJECT if (target / rel).exists()]
+    if old:
+        notes.append("restos de Monday 0.9/AgentForge que no se tocan (migra lo útil a features.json y progress/, luego bórralos): " + ", ".join(old))
+    links = [str(p) for g in LEGACY_GLOBAL
+             for p in sorted(Path(g).expanduser().parent.glob(Path(g).name)) if p.is_symlink()]
+    if links:
+        notes.append("enlaces globales de install.sh (Monday 0.9) que cargan el método antiguo en cualquier proyecto: " + ", ".join(links)
+                     + "; retíralos con `bash install.sh --uninstall` desde esa copia o bórralos a mano")
+    return notes
+
+
 def is_monday_hook(command):
     return re.search(r"monday\.py\"?\s+hook\s", command or "") is not None
 
@@ -921,6 +942,8 @@ def cmd_install(a):
         print(f"  {'crear' if not (target / rel).exists() else 'actualizar'} [{kind}] {rel}")
     for rel in stale:
         print(f"  eliminar [obsoleto] {rel}")
+    for note in install_notices(target):
+        print(f"AVISO: {note}")
     if not changes and not stale and old.get("version") == VERSION and old.get("platforms") == platforms:
         print("  sin cambios")
         return 0
