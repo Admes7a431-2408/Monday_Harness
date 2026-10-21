@@ -130,7 +130,7 @@ The agent needs permission to run `git clone` and `python3`. After installing, s
 
 Monday 0.9 (tag `v0.9.0`) and AgentForge (tag `v0.1.0`) used a different mechanism. Their `install.sh` linked a global skill into `~/.claude/skills/` and `~/.gemini/config/skills/` (`monday` or `agentforge`), plus, with `--agents`, agents into `~/.claude/agents/` (`monday-reviewer`/`-scout`/`-worker` or `af-*`). Their projects had `.monday/CONTEXT.md`, `.monday/contracts/` and `.monday/reports/` (or `.agentforge/`). Monday 1.0 uses none of them.
 
-1. Remove the global links, which would otherwise load the old method in every project: run `bash install.sh --uninstall --agents` from the old checkout those links point to (`readlink ~/.claude/skills/monday`). It only removes links to its own directory, and without `--agents` it leaves the agents in place. Alternatively, delete those symlinks by hand.
+1. Remove the global links, which would otherwise load the old method in every project: run `bash install.sh --uninstall --agents` from the old checkout those links point to (`readlink ~/.claude/skills/monday` or `readlink ~/.claude/skills/agentforge`; install's `AVISO:` lists every link it found). It only removes links to its own directory, and without `--agents` it leaves the agents in place. Alternatively, delete those symlinks by hand.
 2. Install 1.0 as above. Install warns about the old project files and global links it finds, and never modifies them.
 3. Move what is still useful into `features.json` and `progress/`, then delete the old files yourself.
 
