@@ -234,6 +234,53 @@
         "notes": "Ronda 4 (e039dbe): cmd_rollback hace rmtree de .monday/runtime y rmdir de .monday vacío solo si no es dry-run y no queda ningún backup. Comprobado: el test nuevo falla con el monday.py de d6e63a3 y pasa con e039dbe. --dry-run deja runtime intacto. Un rollback parcial (features.json conservado) mantiene backups y runtime. Si .monday/runtime es un symlink a un directorio externo, rmtree no lo sigue (el destino se conserva). runtime solo contiene estado de Monday (verification.json, stop-block.json, hooks.log). init.sh, 51 tests (incluido test_rollback_all_removes_runtime_state), release_check y scope PASS. Minor sin impacto: con runtime como symlink, .monday queda con el enlace."
       },
       "done_at": "2026-10-20T23:15:38-04:00"
+    },
+    {
+      "id": "M-007",
+      "title": "Integrar Model Router nativo: delegación consciente de capacidad, riesgo, esfuerzo y evidencia",
+      "description": "Diseño e integración gradual del Model Router como política central que extiende la delegación existente sin duplicar roles ni acoplar core a proveedores/modelos. La propuesta está en docs/model-router-integration.md.",
+      "status": "pending",
+      "risk": "high",
+      "scope": [
+        "core/**",
+        "adapters/**",
+        "tests/**",
+        "docs/**",
+        "README.md",
+        "CHANGELOG.md",
+        "features.json",
+        "progress/**"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Auditoría de la delegación existente documenta qué mecanismos reutilizar, qué duplicación evitar y qué cambios mínimos requiere la arquitectura."
+        },
+        {
+          "id": "AC2",
+          "text": "Política de routing define áreas/roles, señales de complejidad-riesgo-incertidumbre, capacidades requeridas, tiers/esfuerzo y escalamiento acotado; modelos concretos son configuración de adaptador."
+        },
+        {
+          "id": "AC3",
+          "text": "Plan y ejecución de routing son trazables: tarea, rol, modelo/tier/esfuerzo seleccionado, motivo, escalamiento y evidencia de verificación; no se inventan cuotas/costos ni capacidades."
+        },
+        {
+          "id": "AC4",
+          "text": "El router tiene fallback seguro y límites de reintentos/escalamiento; si no hay ruta capaz o se excede límite, bloquea/escalada humana en vez de degradar silenciosamente."
+        },
+        {
+          "id": "AC5",
+          "text": "Goldfish/review independiente se mantiene separado del implementador y recibe paquete verificable sin contexto privado del coordinador cuando la revisión es requerida."
+        },
+        {
+          "id": "AC6",
+          "text": "Configuración, lógica central y adaptadores conservan el principio agnóstico; pruebas cubren routing, escalamiento, fallback, compatibilidad y no regresión."
+        },
+        {
+          "id": "AC7",
+          "text": "README, architecture, method, roles, adapters y changelog reflejan solo capacidades implementadas y validadas; suite completa pasa."
+        }
+      ]
     }
   ]
 }
