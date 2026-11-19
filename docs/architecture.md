@@ -117,3 +117,10 @@ Contexto: el `main` publicado seguía siendo 0.9, cuyo `install.sh` enlazaba una
 ## Evolución propuesta: Model Router (M-007)
 
 Monday contempla integrar un Router nativo de delegación que extienda los tiers abstractos y roles existentes según área, complejidad, riesgo, incertidumbre, capacidad requerida y evidencia. La propuesta está documentada en [docs/model-router-integration.md](model-router-integration.md). **Todavía no está implementada**: los roles, adaptadores y routing actuales siguen siendo la fuente de comportamiento. La feature M-007 en `features.json` gobierna la implementación y sus criterios de aceptación.
+
+
+## Evolución propuesta: Spec Gate / EGM (M-008)
+
+La propuesta extiende los tres roles existentes —no crea una plantilla fija de tres agentes— con revisión de especificación antes de implementar, activada adaptativamente por riesgo, complejidad e incertidumbre. La especificación se redacta con contexto; Goldfish revisa solo el artefacto y referencias permitidas para detectar supuestos, contradicciones, omisiones, casos límite y simplificaciones. El implementador requiere claridad suficiente y aprobación del Gate cuando este aplique. El revisor conserva su independencia y realiza además revisión post-diff, anclada como hoy.
+
+**Estado:** propuesta, no implementada. La Feature M-008 gobierna auditoría, diseño, tests, integración gradual y criterios de cierre. No reemplaza verificación, revisión de código ni puertas humanas.
