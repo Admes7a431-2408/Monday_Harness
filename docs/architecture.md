@@ -11,9 +11,10 @@ Lectura obligatoria antes de cambiar Monday. Normativa: `Arquitectura Óptima de
                    │
    líder (sesión principal de cualquier plataforma)
      │  lee features.json + progress/current.md; elige modo directo/registrado/orquestado
-     ├── explorador (FAST, solo lectura) ─► hallazgos ─► progress/exploration_logs.md
-     ├── implementador (STANDARD, escribe dentro de scope) ─► diff + comandos
-     └── revisor (DEEP, solo lectura) ─► `monday review` (anclado al diff)
+     ├── explorador (FAST, solo lectura) ─► hechos, riesgos, edge cases ─► líder/spec
+     ├── Spec Gate (adaptativo): Elephant redacta spec ─► Goldfish fresh-context audit ─► aprobación
+     ├── implementador (STANDARD, escribe dentro de scope) ─► diff + pruebas/evidencia
+     └── revisor (DEEP, solo lectura) ─► contrato/spec + calidad + evidencia
                    │
    monday done ── init.sh · criterios ejecutables · alcance (git) · revisión ─► history.md
                    │
@@ -38,6 +39,18 @@ Lectura obligatoria antes de cambiar Monday. Normativa: `Arquitectura Óptima de
 | Estado de verificación (`.monday/runtime/verification.json`) | Determinista | `status` y el inicio de sesión comunican ROJO / VERDE / DESACTUALIZADA / ninguna; la ausencia de evidencia nunca se presenta como éxito | Es la última verificación registrada (hook o `done`) y la huella cubre HEAD + cambios sin commitear (no `progress/`, `features.json` ni archivos ignorados por git); el archivo es editable, así que solo informa: `done` siempre verifica de nuevo |
 | `monday check` + manifiesto | Determinista | Archivos gestionados sin divergencias; adaptadores registrados; `AGENTS.md` < 200 líneas | Detecta, no impide |
 | Reglas de oro y método | Conductual | Criterio del agente | Un modelo puede ignorarlas; por eso lo crítico tiene mecanismo |
+
+## Spec Gate / EGM (propuesta M-008)
+
+Antes de programar, Monday aplica una gate proporcional: omitir en cambios triviales; ligera/optativa en prototipos; obligatoria para lógica compleja, dinero, seguridad, persistencia/migraciones, concurrencia, APIs públicas, arquitectura/refactors amplios o ambigüedad de alto impacto.
+
+- **Elephant (líder con contexto):** explora, identifica preguntas y redacta una spec autocontenida con objetivos/no objetivos, reglas/invariantes, flujos, interfaces/datos, errores/recuperación, riesgos, edge cases y criterios comprobables.
+- **Goldfish (auditor fresh-context):** recibe solo la spec y fuentes explícitamente incluidas; busca ambigüedades, omisiones, contradicciones, supuestos, edge cases, seguridad/integridad, testabilidad y complejidad. No recibe chat previo ni las conclusiones narradas del Elephant.
+- **Reconciliación/gate:** el líder evalúa hallazgos, corrige o pregunta al humano. Hallazgos críticos/importantes sin resolver bloquean. Máximo dos ciclos de revisión; después escalar o bloquear.
+- **Implementador:** comienza solo con spec aprobada cuando el gate es obligatorio; sus cambios trazan a spec y scope.
+- **Revisor:** separado del implementador, audita contrato/spec, calidad y evidencia. Declara si la independencia fresh-context no pudo lograrse.
+
+El protocolo no requiere instalar el plugin citado en el video. La separación de contexto mejora la detección de omisiones, pero no garantiza independencia ni correctness; no reemplaza tests, revisión del diff ni validación real. No multiplicar auditores por defecto.
 
 ## Compatibilidad comprobada
 
@@ -104,6 +117,10 @@ Contexto: Monday 1.0 se reconstruyó en un repositorio nuevo cuyo historial no c
 ### D-013 — Instalar en proyectos existentes: avisar de lo no gestionado, no migrarlo (2026-10-20)
 
 Contexto: el `main` publicado seguía siendo 0.9, cuyo `install.sh` enlazaba una skill global, y sus proyectos tienen `.monday/CONTEXT.md`, `contracts/` y `reports/`. Además, un proyecto con `init.sh` propio no ejecuta `monday check`, así que `./init.sh` en verde no validaba el harness. Decisión: `install` imprime `AVISO:` para el `init.sh` propio sin `monday check`, los restos de 0.9/AgentForge del proyecto y los enlaces globales de `install.sh` 0.9 y 0.1 (`~/.claude/skills/{monday,agentforge}`, `~/.gemini/config/skills/{monday,agentforge}`, `~/.claude/agents/{monday-*,af-*}.md`; se retiran con `install.sh --uninstall --agents` desde su copia). Los lee y nunca los modifica. El README documenta la migración y cómo pedir la instalación a un agente desde la URL pública, con el clon fuera del proyecto y fijado al tag. `tests/quickstart.sh [url [ref]]` reproduce el README contra la URL publicada. Alternativas descartadas: migración automática o reconstruir `--purge-legacy` (retirado en 1.0, ver CHANGELOG; borrar fuera del proyecto es una puerta humana); insertar la línea en el `init.sh` del usuario (es un archivo del proyecto). Consecuencias: la migración es manual pero visible, y `rollback --all` sigue dejando el proyecto byte a byte como estaba.
+
+### D-014 — Spec Gate proporcional con revisión fresh-context (propuesta M-008)
+
+Contexto: la revisión de implementación puede detectar defectos, pero ambigüedades de negocio o requisitos implícitos pueden llegar al código y volverse costosos de corregir. El método EGM (Elephant Goldfish Model) sugiere auditar la especificación desde contexto separado antes de construir. Decisión propuesta: activar Spec Gate por riesgo/ambigüedad; el líder con contexto redacta una spec autocontenida y un auditor Goldfish recibe solo esa spec y material permitido. El líder reconcilia hallazgos y aprueba explícitamente; implementador no comienza si la gate es obligatoria y no está aprobada. Revisión final evalúa diff contra spec y evidencia. Alternativas descartadas: gate universal (burocracia), varios Goldfish por defecto (coste sin evidencia), plugin de terceros obligatorio (dependencia innecesaria). Límites: independencia real depende del contexto entregado; no garantiza correctness y no reemplaza pruebas. Pendiente de implementación y validación M-008.
 
 ## Reglas aprendidas
 
