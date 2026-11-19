@@ -112,3 +112,8 @@ Contexto: el `main` publicado seguía siendo 0.9, cuyo `install.sh` enlazaba una
 
 - Los criterios que ejecutan Python en tests deben usar `python3 -B` o un `.gitignore` con `__pycache__/`: una caché `.pyc` del mismo segundo y tamaño ocultó un arreglo y apareció como cambio fuera de alcance — evidencia: primera ejecución de `tests/test_monday.py` (2026-10-18).
 - Nunca asumir el contrato de una plataforma (semántica de respuestas de hook, nombres de herramientas o de argumentos): comprobarlo con el CLI real y diseñar la guarda para que falle cerrada ante herramientas desconocidas (las rutas solo se detectan en claves reconocibles; lo demás lo atrapa `done`). `{}` deniega en agy, `ask` se autoaprueba en `accept-edits` y el catálogo de herramientas cambió (`edit_file`/`Path`) sin cambiar de versión — evidencia: `progress/exploration_logs.md` (2026-10-18 y 2026-10-19), rechazo de `done` M-005 en `progress/history.md`. Segunda aparición del patrón: regla reforzada.
+
+
+## Evolución propuesta: Model Router (M-007)
+
+Monday contempla integrar un Router nativo de delegación que extienda los tiers abstractos y roles existentes según área, complejidad, riesgo, incertidumbre, capacidad requerida y evidencia. La propuesta está documentada en [docs/model-router-integration.md](model-router-integration.md). **Todavía no está implementada**: los roles, adaptadores y routing actuales siguen siendo la fuente de comportamiento. La feature M-007 en `features.json` gobierna la implementación y sus criterios de aceptación.
