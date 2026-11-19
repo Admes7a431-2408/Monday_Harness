@@ -281,6 +281,57 @@
           "text": "README, architecture, method, roles, adapters y changelog reflejan solo capacidades implementadas y validadas; suite completa pasa."
         }
       ]
+    },
+    {
+      "id": "M-008",
+      "title": "Spec Gate adaptativo (EGM): revisión independiente de especificaciones antes de implementación",
+      "description": "Extender explorador, implementador y revisor con un protocolo EGM/Goldfish pre-código, activado proporcionalmente al riesgo, complejidad e incertidumbre. Integrar con M-007 Model Router sin duplicar agentes ni gates.",
+      "status": "pending",
+      "risk": "high",
+      "scope": [
+        "core/**",
+        "adapters/**",
+        "tests/**",
+        "docs/**",
+        "README.md",
+        "CHANGELOG.md",
+        "features.json",
+        "progress/**"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Auditoría documenta cómo extender los roles existentes y los adaptadores, sin duplicarlos ni degradar sus permisos."
+        },
+        {
+          "id": "AC2",
+          "text": "Política adaptativa define activadores, niveles mínimos de revisión y exenciones de tareas triviales/prototipos; contempla riesgo, incertidumbre y reversibilidad."
+        },
+        {
+          "id": "AC3",
+          "text": "Spec Gate pre-implementación: Elephant prepara spec; Goldfish en contexto limpio reconstruye comprensión, detecta huecos/contradicciones/decisiones que tendría que inventar, edge cases, riesgos y simplificación; líder reconcilia y escala preguntas bloqueantes."
+        },
+        {
+          "id": "AC4",
+          "text": "La aprobación queda registrada y los cambios sustanciales reabren el Gate; implementador no inventa ni altera unilateralmente decisiones/spec."
+        },
+        {
+          "id": "AC5",
+          "text": "Independencia y limitaciones de contexto/plataforma se declaran con honestidad; no se simula independencia; fallback humano o ruta alternativa."
+        },
+        {
+          "id": "AC6",
+          "text": "Goldfish y review post-implementación no sustituyen pruebas, revisión anclada al diff ni gates deterministas existentes."
+        },
+        {
+          "id": "AC7",
+          "text": "Router (M-007) selecciona modelo/esfuerzo/cantidad de revisores de forma acotada; no se obliga a tres agentes por tarea ni se generan loops de auditoría."
+        },
+        {
+          "id": "AC8",
+          "text": "Tests deterministas cubren activación/exención, ciclo de aprobación, invalidación por cambios, fallback y no regresión; docs describen solo comportamiento implementado y suite pasa."
+        }
+      ]
     }
   ]
 }
