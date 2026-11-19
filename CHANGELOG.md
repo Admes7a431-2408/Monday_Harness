@@ -63,3 +63,9 @@ AgentForge's methodology, with routing L0–L5, quality gates, YAML contracts, t
 - Added feature contract M-007 for a native, model-agnostic routing policy.
 - Added an architecture proposal covering role routing, capability/risk-aware selection, bounded escalation, independent Goldfish review, adapter mappings, traceability and staged rollout.
 - Proposal only; no runtime routing behavior changed in this update.
+
+
+## Unreleased — Spec Gate / EGM proposal
+
+- Updated explorer, implementer and reviewer role contracts to support spec-first workflows, context-isolated Goldfish review, and stricter implementation against approved requirements.
+- Added proposed adaptive Spec Gate M-008 and design doc; proposal only, no runtime behavior changed.
