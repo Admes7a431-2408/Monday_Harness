@@ -48,11 +48,11 @@ Installing Monday into a project adds a small set of files. All of them are plai
 | `.monday/` | Managed core: method, roles, policy and the `monday.py` CLI (Python 3, standard library only) |
 | Adapters | `CLAUDE.md` + `.claude/` (Claude Code) and `.agents/` (Antigravity): hooks and role agents |
 
-The agent picks a **mode** based on complexity and risk:
+The agent picks a **mode** based on complexity and risk, and may use an adaptive **Spec Gate** before implementation for high-risk or ambiguous work:
 
 - **Direct**: a clear, local, low-risk change. Do it, run the relevant check, say what changed.
 - **Tracked**: a feature in `features.json` with criteria, closed with `monday done`.
-- **Orchestrated**: exploration by a read-only explorer, implementation from a brief, and an independent review.
+- **Orchestrated**: read-only exploration, an approved self-contained specification with fresh-context audit when Spec Gate applies, implementation from that contract, and independent review.
 
 **Closing a task is decided by Monday, not by the agent.** `monday done <id>` accepts a feature only if all of these pass:
 
@@ -194,7 +194,7 @@ Monday is developed with Monday: this repository has its own `AGENTS.md`, `featu
 
 ## Evolving and contributing
 
-The backlog lives in [`features.json`](features.json). Open items include a Codex CLI adapter, validation on the Antigravity IDE, and the `amend` alias guard.
+The backlog lives in [`features.json`](features.json). Open items include a Codex CLI adapter, validation on the Antigravity IDE, the `amend` alias guard, and the proposed adaptive Spec Gate (M-008).
 
 To contribute, work the Monday way:
 

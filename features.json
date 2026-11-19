@@ -234,6 +234,59 @@
         "notes": "Ronda 4 (e039dbe): cmd_rollback hace rmtree de .monday/runtime y rmdir de .monday vacío solo si no es dry-run y no queda ningún backup. Comprobado: el test nuevo falla con el monday.py de d6e63a3 y pasa con e039dbe. --dry-run deja runtime intacto. Un rollback parcial (features.json conservado) mantiene backups y runtime. Si .monday/runtime es un symlink a un directorio externo, rmtree no lo sigue (el destino se conserva). runtime solo contiene estado de Monday (verification.json, stop-block.json, hooks.log). init.sh, 51 tests (incluido test_rollback_all_removes_runtime_state), release_check y scope PASS. Minor sin impacto: con runtime como symlink, .monday queda con el enlace."
       },
       "done_at": "2026-10-20T23:15:38-04:00"
+    },
+    {
+      "id": "M-008",
+      "title": "Spec Gate adaptativo: especificación autocontenida y auditoría fresh-context (EGM)",
+      "description": "Propuesta para fortalecer exploración, implementación y revisión: activar una gate proporcional a complejidad/riesgo; Elephant redacta una spec autocontenida y Goldfish la audita desde contexto aislado antes de implementación cuando sea obligatorio. Integrar sin duplicar roles ni imponer burocracia a cambios triviales.",
+      "status": "pending",
+      "risk": "high",
+      "scope": [
+        "core/method.md",
+        "core/roles/**",
+        "adapters/**",
+        "tests/**",
+        "docs/**",
+        "README.md",
+        "CHANGELOG.md",
+        "features.json",
+        "progress/**"
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Spec Gate adaptativo tiene activadores/criterios claros: trivial omite; UI/prototipo puede ser ligera; alto riesgo, negocio complejo, persistencia, dinero, seguridad, concurrencia, APIs/arquitectura y ambigüedad de impacto alto requieren Gate."
+        },
+        {
+          "id": "AC2",
+          "text": "Spec autocontenida incluye objetivos/no objetivos, reglas/invariantes, flujos, interfaces/datos, errores/recuperación, riesgos/edge cases, criterios verificables y preguntas abiertas."
+        },
+        {
+          "id": "AC3",
+          "text": "Auditor Goldfish recibe solo la spec y fuentes autorizadas; documenta revisión fresh-context y no se declara independencia si contexto compartido/contaminado."
+        },
+        {
+          "id": "AC4",
+          "text": "Hallazgos se reconciliaron; preguntas críticas/importantes bloquean implementación; iteraciones limitadas con escalamiento humano."
+        },
+        {
+          "id": "AC5",
+          "text": "Implementador exige spec aprobada cuando Gate es obligatorio y solo implementa alcance/criterios acordados."
+        },
+        {
+          "id": "AC6",
+          "text": "Revisor distinto del implementador audita contrato/spec, calidad y evidencia; revisión queda anclada al diff; Goldfish no sustituye tests."
+        },
+        {
+          "id": "AC7",
+          "text": "Roles, método, arquitectura, adapters y documentación son coherentes; no duplican instrucciones ni rompen integraciones existentes."
+        },
+        {
+          "id": "AC8",
+          "text": "Tests de regresión deterministas y suite existente pasan; se documentan capacidades de contexto fresco realmente disponibles, límites y verificación."
+        }
+      ],
+      "depends_on": []
     }
   ]
 }

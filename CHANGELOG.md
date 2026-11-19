@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — proposal only
+
+- Propose adaptive Spec Gate / EGM workflow: context-rich specification, fresh-context Goldfish audit, explicit approval before implementation for high-risk/complex work. This proposal also refines explorer, implementer and reviewer role contracts. No runtime behavior is implemented or released.
+
+
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); [semantic versioning](https://semver.org/).
 
 ## [1.0.0] - 2026-10-20
