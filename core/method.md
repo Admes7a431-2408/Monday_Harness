@@ -47,7 +47,18 @@ El **líder** es el agente que habla con el humano. Lee `features.json` y `curre
 | Implementador | STANDARD | Escritura dentro de `scope` | Cambio + comandos ejecutados y su salida | `.monday/roles/implementer.md` |
 | Revisor | DEEP | Solo lectura + ejecutar comprobaciones | Veredicto por ejes + hallazgos + reglas propuestas | `.monday/roles/reviewer.md` |
 
-El tier es abstracto; cada adaptador lo traduce a un modelo concreto.
+El tier es abstracto; cada adaptador lo traduce a un modelo concreto. El Model Router (si se implementa) decidirá esfuerzo/modelo según señales, sin crear roles duplicados.
+
+### Spec Gate / EGM (propuesta M-008)
+
+Gate adaptativo antes de implementación: omitir cambios triviales; usar versión ligera para prototipos/UI; requerirla en negocio complejo, persistencia/migraciones, dinero, seguridad, concurrencia, APIs públicas, arquitectura/refactor amplio o ambigüedad de impacto alto.
+
+1. **Elephant (líder con contexto):** redacta spec autocontenida con objetivo/no objetivos, reglas/invariantes, flujos, datos/interfaces, errores/recuperación, riesgos, edge cases, criterios verificables y preguntas abiertas.
+2. **Goldfish (fresh-context):** recibe solo spec y referencias autorizadas, no chat previo ni narrativa del Elephant. Busca ambigüedades, contradicciones, omisiones, supuestos, seguridad/integridad, testabilidad y complejidad.
+3. **Reconciliar:** líder clasifica hallazgos y corrige spec o pregunta al humano. Hallazgos critical/important pendientes bloquean.
+4. **Aprobar explícitamente:** máximo dos ciclos de corrección/revisión; luego escalar o bloquear. No hay aprobación por silencio.
+5. Implementador usa spec aprobada cuando Gate obligatorio. Revisor distinto del implementador audita diff contra spec, calidad y evidencia.
+6. Declarar fresh-context/independencia solo si realmente se aisló el contexto. EGM no sustituye tests ni garantiza correctness; no se exige plugin externo ni múltiples Goldfish por defecto.
 
 **Cuándo delegar.** Delega lo que consume mucho contexto y poco razonamiento (búsquedas amplias, muchos archivos, cambios repetitivos ya decididos) y la revisión independiente. Hazlo tú si cabe en pocos pasos o depende de mucho contexto de la conversación: escribir el brief costaría más que hacerlo.
 
@@ -56,10 +67,11 @@ El tier es abstracto; cada adaptador lo traduce a un modelo concreto.
 ```
 Rol: <explorer|implementer|reviewer> — lee .monday/roles/<rol>.md
 Feature: <id> (features.json) · Objetivo: <una frase verificable>
-Contexto: <rutas a leer: exploration_logs, docs/architecture.md, archivos clave>
+Contexto: <rutas concretas>
+Spec: <ruta + estado aprobado, o "no aplica">
 Alcance: <scope de la feature o "solo lectura">
 Hecho cuando: <criterios y cómo comprobarlos>
-Devuelve: STATUS + ≤15 líneas
+Devuelve: STATUS + evidencia breve
 ```
 
 **Estados de respuesta** (primera línea): `DONE` · `DONE_WITH_CONCERNS` (hecho, con dudas explícitas) · `NEEDS_CONTEXT` (falta un dato concreto) · `BLOCKED` (no puede o no debe seguir: alcance, permisos, capacidad) · `FAILED` (lo intentó; adjunta la evidencia).
