@@ -43,9 +43,9 @@ El **líder** es el agente que habla con el humano. Lee `features.json` y `curre
 
 | Rol | Tier | Permisos | Entregable | Definición |
 |---|---|---|---|---|
-| Explorador | FAST | Solo lectura | Hallazgos `archivo:línea` + archivos a tocar + riesgos | `.monday/roles/explorer.md` |
-| Implementador | STANDARD | Escritura dentro de `scope` | Cambio + comandos ejecutados y su salida | `.monday/roles/implementer.md` |
-| Revisor | DEEP | Solo lectura + ejecutar comprobaciones | Veredicto por ejes + hallazgos + reglas propuestas | `.monday/roles/reviewer.md` |
+| Explorador | FAST | Solo lectura | Exploración técnica o revisión Goldfish de spec: hechos/referencias, interpretación, ambigüedades, riesgos y simplificación | `.monday/roles/explorer.md` |
+| Implementador | STANDARD | Escritura dentro de `scope`; implementa solo una spec suficientemente clara/aprobada cuando Spec Gate aplica | Cambio + pruebas/evidencia + desviaciones | `.monday/roles/implementer.md` |
+| Revisor | DEEP | Solo lectura + ejecutar comprobaciones; revisión Goldfish pre-implementación o review post-diff | Veredicto por contrato/calidad + hallazgos concretos + límites de independencia | `.monday/roles/reviewer.md` |
 
 El tier es abstracto; cada adaptador lo traduce a un modelo concreto.
 
@@ -68,7 +68,7 @@ Devuelve: STATUS + ≤15 líneas
 
 **Límites.** Los subagentes no delegan. Varios implementadores en paralelo solo con alcances disjuntos (o en worktrees separados). El revisor nunca es quien implementó. Quien corrige los hallazgos es el implementador, no el revisor.
 
-## 4. Verificación y evidencia
+## 3.1 Spec Gate (propuesta M-008; aún no implementada)\n\nPara tareas con reglas de negocio, datos/persistencia, dinero, seguridad, concurrencia, arquitectura o alto impacto, el líder debe exigir una especificación antes del coding. El Gate se adapta al riesgo: no aplica a cambios triviales/reversibles ni convierte prototipos simples en burocracia.\n\nCiclo cuando se activa: (1) líder/Elephant redacta spec con contexto y pregunta decisiones bloqueantes; (2) revisión Goldfish en contexto limpio, solo con spec y referencias autorizadas, reconstruye comprensión y detecta información que tendría que inventar; (3) una revisión independiente busca contradicciones, omisiones, edge cases, riesgos de integridad/seguridad/concurrencia y simplificaciones; (4) líder reconcilia hallazgos y pregunta al humano lo crítico; (5) cambios sustanciales reabren revisión; (6) aprobación explícita habilita implementación. Goldfish no es necesariamente tres agentes: Router decide cantidad/esfuerzo apropiado, con revisión mínima de comprensión + crítica independiente cuando se exige. No se afirma independencia si plataforma/contexto no la permiten; se declara limitación o escala. La spec aprobada no sustituye pruebas, revisión de diff ni gates existentes.\n\n## 4. Verificación y evidencia
 
 - **Fresca:** ejecutada después del último cambio. **Observada:** el comando y su salida, no «debería funcionar». **Capaz de fallar:** una comprobación que no puede fallar ante el defecto no es evidencia.
 - **Estados:** `PASS` (ejecutada y superada) · `FAIL` (ejecutada y fallida) · `UNAVAILABLE` (no se pudo ejecutar: falta herramienta o entorno) · `MANUAL` (comprobada por una persona o agente, con evidencia escrita). `UNAVAILABLE` nunca cuenta como éxito: o se aporta evidencia manual (`--manual AC2="…"`) o la feature no se cierra.
